@@ -1,1 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocVault Pro | Secure Document Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #4f46e5;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --accent: #22d3ee;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body { background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+        /* Sidebar Design */
+        .sidebar {
+            position: fixed; width: 260px; height: 100vh;
+            background: var(--card); border-right: 1px solid rgba(255,255,255,0.1);
+            padding: 2rem; display: flex; flex-direction: column; gap: 2rem;
+        }
+
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+
+        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
+        .nav-links li { 
+            padding: 12px; border-radius: 10px; cursor: pointer; 
+            display: flex; align-items: center; gap: 12px; transition: 0.3s;
+        }
+        .nav-links li:hover, .nav-links li.active { background: var(--primary); }
+
+        /* Main Content */
+        .main-content { margin-left: 260px; padding: 2rem; width: calc(100% - 260px); }
+
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; }
+
+        .search-box {
+            background: var(--card); border: 1px solid rgba(255,255,255,0.1);
+            padding: 10px 20px; border-radius: 12px; display: flex; align-items: center; gap: 10px; width: 400px;
+        }
+        .search-box input { background: none; border: none; color: white; outline: none; width: 100%; }
+
+        /* Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 3rem; }
+        .stat-card { 
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: var(--card); border: 2px dashed var(--primary);
+            padding: 3rem; border-radius: 20px; text-align: center; margin-bottom: 2rem;
+            cursor: pointer; transition: 0.3s;
+        }
+        .upload-section:hover { background: rgba(99, 102, 241, 0.05); }
+
+        /* File List Table */
+        .file-list { background: var(--card); border-radius: 20px; padding: 1.5rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8; }
+        td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        .btn-upload {
+            background: var(--accent); color: #000; font-weight: 600;
+            padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer;
+        }
+
+        /* Hide Auth Container initially for demo, show later */
+        #app-body { display: none; }
+        #auth-body { 
+            height: 100vh; display: flex; justify-content: center; align-items: center; 
+            background: radial-gradient(circle at top right, #4f46e5, #0f172a);
+        }
+        .login-card { 
+            background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px);
+            padding: 3rem; border-radius: 24px; text-align: center; width: 400px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="auth-body">
+        <div class="login-card">
+            <div class="logo" style="justify-content: center; margin-bottom: 1rem;">
+                <i data-lucide="shield-check"></i> DocVault Pro
+            </div>
+            <h2 style="margin-bottom: 2rem;">Welcome Back</h2>
+            <button class="btn-upload" style="width: 100%; margin-bottom: 1rem;" onclick="showApp()">
+                Continue to Dashboard
+            </button>
+            <p style="font-size: 0.8rem; color: #94a3b8;">Secure End-to-End Encryption Enabled</p>
+        </div>
+    </div>
+
+    <div id="app-body">
+        <div class="sidebar">
+            <div class="logo"><i data-lucide="folder-lock"></i> DocVault</div>
+            <ul class="nav-links">
+                <li class="active"><i data-lucide="layout-dashboard"></i> Dashboard</li>
+                <li><i data-lucide="file-text"></i> All Documents</li>
+                <li><i data-lucide="star"></i> Favorites</li>
+                <li><i data-lucide="settings"></i> Settings</li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <header>
+                <div class="search-box">
+                    <i data-lucide="search"></i>
+                    <input type="text" placeholder="Search your files...">
+                </div>
+                <button class="btn-upload" onclick="triggerUpload()"><i data-lucide="plus"></i> New Upload</button>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <p style="color: #94a3b8;">Total Files</p>
+                    <h1 id="fileCount">0</h1>
+                </div>
+                <div class="stat-card">
+                    <p style="color: #94a3b8;">Storage Used</p>
+                    <h1>0.2 MB</h1>
+                </div>
+                <div class="stat-card">
+                    <p style="color: #94a3b8;">Security Level</p>
+                    <h1 style="color: #4ade80;">Maximum</h1>
+                </div>
+            </div>
+
+            <div class="upload-section" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                <i data-lucide="cloud-upload" style="width: 48px; height: 48px; color: var(--primary);"></i>
+                <h3>Drag & Drop Files Here</h3>
+                <p style="color: #94a3b8;">Supported formats: PDF, PNG, JPG, DOCX</p>
+                <input type="file" id="fileInput" hidden onchange="handleFile(event)">
+            </div>
+
+            <div class="file-list">
+                <h3>Recent Documents</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Date</th>
+                            <th>Size</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filesTable">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // --- Supabase Config ---
+        const SB_URL = "YOUR_SUPABASE_URL";
+        const SB_KEY = "YOUR_SUPABASE_ANON_KEY";
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+        // UI Functions
+        function showApp() {
+            document.getElementById('auth-body').style.display = 'none';
+            document.getElementById('app-body').style.display = 'flex';
+        }
+
+        function triggerUpload() {
+            document.getElementById('fileInput').click();
+        }
+
+        // File Handling
+        async function handleFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Simple Local UI Update (Testing purpose)
+            const row = `<tr>
+                <td><i data-lucide="file" style="width:16px;"></i> ${file.name}</td>
+                <td>Just Now</td>
+                <td>${(file.size/1024).toFixed(2)} KB</td>
+                <td style="color:var(--accent); cursor:pointer;">Download</td>
+            </tr>`;
+            
+            document.getElementById('filesTable').innerHTML += row;
+            document.getElementById('fileCount').innerText = parseInt(document.getElementById('fileCount').innerText) + 1;
+            lucide.createIcons();
+            
+            alert("Professional Tip: Abhi Phase 1 Step 4 pending hai, isliye file backend par nahi sirf UI par dikhegi!");
+        }
+    </script>
+</body>
+</html>
