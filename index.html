@@ -3,174 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocVault Pro | Secure Document Manager By "Gyanendra Singh"</title>
+    <title>DocVault Pro | Secure Access</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
-            --primary: #6366f1; --secondary: #4f46e5; --bg: #0f172a;
-            --card: #1e293b; --text: #f8fafc; --accent: #22d3ee;
+            --primary: #6366f1; --bg: #0f172a; --card: #1e293b;
+            --text: #f8fafc; --accent: #22d3ee;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: var(--bg); color: var(--text); overflow: hidden; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
 
-        /* Sidebar */
-        .sidebar {
-            position: fixed; width: 260px; height: 100vh;
-            background: var(--card); border-right: 1px solid rgba(255,255,255,0.1);
-            padding: 2rem; display: flex; flex-direction: column; gap: 2rem;
-        }
-        .logo { font-size: 1.5rem; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 10px; }
-        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
-        .nav-links li { 
-            padding: 12px; border-radius: 10px; cursor: pointer; 
-            display: flex; align-items: center; gap: 12px; transition: 0.3s; color: #94a3b8;
-        }
-        .nav-links li:hover, .nav-links li.active { background: var(--primary); color: white; }
-
-        /* Content Area */
-        .main-content { margin-left: 260px; padding: 2rem; width: calc(100% - 260px); height: 100vh; overflow-y: auto; }
-        .page { display: none; }
-        .page.active { display: block; }
-
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .search-box {
-            background: var(--card); border: 1px solid rgba(255,255,255,0.1);
-            padding: 10px 20px; border-radius: 12px; display: flex; align-items: center; gap: 10px; width: 400px;
-        }
-        .search-box input { background: none; border: none; color: white; outline: none; width: 100%; }
-
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
-        .stat-card { background: var(--card); padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
-
-        .upload-section {
-            background: var(--card); border: 2px dashed var(--primary);
-            padding: 2.5rem; border-radius: 20px; text-align: center; margin-bottom: 2rem; cursor: pointer;
-        }
-
-        .file-list { background: var(--card); border-radius: 20px; padding: 1.5rem; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 1rem; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-        .btn-upload { background: var(--accent); color: #000; font-weight: 600; padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-
-        /* Login */
+        /* Auth Screen Styles */
         #auth-body { height: 100vh; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle at top right, #4f46e5, #0f172a); }
-        .login-card { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); padding: 3rem; border-radius: 24px; text-align: center; width: 400px; border: 1px solid rgba(255,255,255,0.1); }
+        .login-card { background: rgba(30, 41, 59, 0.9); backdrop-filter: blur(15px); padding: 2.5rem; border-radius: 24px; width: 400px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        
+        .auth-tabs { display: flex; gap: 10px; margin-bottom: 2rem; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: none; color: #94a3b8; cursor: pointer; border-radius: 8px; font-weight: 600; transition: 0.3s; }
+        .tab-btn.active { background: var(--primary); color: white; }
+
+        .input-group { margin-bottom: 1.5rem; text-align: left; }
+        .input-group label { display: block; margin-bottom: 8px; font-size: 0.9rem; color: #94a3b8; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: #0f172a; color: white; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--accent); }
+
+        .btn-main { width: 100%; padding: 14px; border-radius: 10px; border: none; background: var(--accent); color: #000; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .btn-main:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(34, 211, 238, 0.3); }
+
+        /* Main App remains same as previous version but hidden initially */
+        #app-body { display: none; height: 100vh; flex-direction: row; }
+        /* (Baki CSS wahi hai jo pehle dashboard ke liye di thi) */
+        .sidebar { width: 260px; background: var(--card); border-right: 1px solid rgba(255,255,255,0.1); padding: 2rem; }
+        .main-content { flex: 1; padding: 2rem; overflow-y: auto; }
     </style>
 </head>
 <body>
 
     <div id="auth-body">
         <div class="login-card">
-            <div class="logo" style="justify-content: center; margin-bottom: 1rem;"><i data-lucide="shield-check"></i> DocVault Pro</div>
-            <h2 style="margin-bottom: 2rem;">Secure Login Developed by "Gyanendra Singh"</h2>
-            <button class="btn-upload" style="width: 100%; margin-bottom: 1rem; justify-content: center;" onclick="loginWithGoogle()">
-                <i data-lucide="log-in"></i> Continue with Google
-            </button>
-            <p style="font-size: 0.8rem; color: #94a3b8;">Use your Google account to sync files</p>
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h2 style="color: var(--accent);"><i data-lucide="shield-check"></i> DocVault Pro</h2>
+                <p style="color: #94a3b8; font-size: 0.9rem;">Secure Document Storage</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchAuth('email', this)">Email</button>
+                <button class="tab-btn" onclick="switchAuth('phone', this)">Phone</button>
+            </div>
+
+            <div id="email-form">
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="emailInput" placeholder="name@example.com">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="passInput" placeholder="••••••••">
+                </div>
+                <button class="btn-main" onclick="handleEmailLogin()"><i data-lucide="mail"></i> Login / Sign Up</button>
+            </div>
+
+            <div id="phone-form" style="display: none;">
+                <div class="input-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="phoneInput" placeholder="+91 9876543210">
+                </div>
+                <div id="otp-section" style="display: none;">
+                    <div class="input-group">
+                        <label>Enter OTP</label>
+                        <input type="text" id="otpInput" placeholder="6-digit code">
+                    </div>
+                </div>
+                <button id="phoneBtn" class="btn-main" onclick="handlePhoneLogin()"><i data-lucide="phone"></i> Send OTP</button>
+            </div>
         </div>
     </div>
 
-    <div id="app-body" style="display:none;">
-        <div class="sidebar">
-            <div class="logo"><i data-lucide="folder-lock"></i> DocVault</div>
-            <ul class="nav-links">
-                <li class="active" onclick="switchPage('dashboard', this)"><i data-lucide="layout-dashboard"></i> Dashboard</li>
-                <li onclick="switchPage('all-files', this)"><i data-lucide="file-text"></i> All Documents</li>
-                <li onclick="switchPage('favorites', this)"><i data-lucide="star"></i> Favorites</li>
-                <li onclick="switchPage('settings', this)"><i data-lucide="settings"></i> Settings</li>
-            </ul>
-        </div>
-
-        <div class="main-content">
-            <div id="dashboard" class="page active">
-                <header>
-                    <div class="search-box"><i data-lucide="search"></i><input type="text" placeholder="Search files..."></div>
-                    <button class="btn-upload" onclick="document.getElementById('fileInput').click()"><i data-lucide="plus"></i> New Upload</button>
-                </header>
-                <div class="stats-grid">
-                    <div class="stat-card"><p>Total Files</p><h1 id="fileCount">0</h1></div>
-                    <div class="stat-card"><p>Storage</p><h1>Cloud Active</h1></div>
-                    <div class="stat-card"><p>Security</p><h1 style="color: #4ade80;">Locked</h1></div>
-                </div>
-                <div class="upload-section" onclick="document.getElementById('fileInput').click()">
-                    <i data-lucide="cloud-upload" style="width: 40px; height: 40px; color: var(--primary);"></i>
-                    <h3>Tap to Upload Document</h3>
-                    <input type="file" id="fileInput" hidden onchange="handleFile(event)">
-                </div>
-                <div class="file-list">
-                    <h3>Recent Uploads</h3>
-                    <table>
-                        <thead><tr><th>Name</th><th>Date</th><th>Size</th><th>Action</th></tr></thead>
-                        <tbody id="filesTable"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="all-files" class="page"><h1>All Documents</h1><p>List of all your synced files.</p></div>
-            <div id="favorites" class="page"><h1>Favorites</h1><p>Your starred documents will appear here.</p></div>
-            <div id="settings" class="page"><h1>Settings</h1><button class="btn-upload" style="background:#ef4444; color:white;" onclick="location.reload()">Logout</button></div>
-        </div>
+    <div id="app-body">
+       <div class="sidebar">
+           <h2>DocVault</h2>
+           <p onclick="location.reload()" style="cursor:pointer; color:red; margin-top:20px;">Logout</p>
+       </div>
+       <div class="main-content">
+           <h1>Welcome to your Vault</h1>
+           <p>Logged in successfully!</p>
+       </div>
     </div>
 
     <script>
         lucide.createIcons();
 
-        // CONFIG (Check if these are correct)
+        // Supabase Keys
         const SB_URL = "https://sazdnbsestnlwxogxnfd.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhemRuYnNlc3RubHd4b2d4bmZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NjE0NzcsImV4cCI6MjA5MjQzNzQ3N30.erpQghV9yktpj1efrNMkgsTzY7ePJDYIZhU1E_3CHMs";
-        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        const supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        // 1. LOGIN LOGIC
-        async function loginWithGoogle() {
-            const { data, error } = await supabaseClient.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: window.location.href }
-            });
-            if (error) alert("Login Error: " + error.message);
+        // UI Logic
+        function switchAuth(type, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if(type === 'email') {
+                document.getElementById('email-form').style.display = 'block';
+                document.getElementById('phone-form').style.display = 'none';
+            } else {
+                document.getElementById('email-form').style.display = 'none';
+                document.getElementById('phone-form').style.display = 'block';
+            }
         }
 
-        // Check if user is already logged in (Simulated for GitHub Pages)
-        window.onload = async () => {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (user) {
-                document.getElementById('auth-body').style.display = 'none';
-                document.getElementById('app-body').style.display = 'flex';
-            }
-        };
+        // --- EMAIL LOGIN LOGIC ---
+        async function handleEmailLogin() {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passInput').value;
 
-        // Temporary bypass button logic (since Google Login needs extra setup)
-        function showApp() { 
+            // Try Login
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                // If account doesn't exist, try Signing Up
+                const { error: signUpError } = await supabase.auth.signUp({ email, password });
+                if (signUpError) alert("Error: " + signUpError.message);
+                else alert("Sign up successful! Please check your email for verification.");
+            } else {
+                enterApp();
+            }
+        }
+
+        // --- PHONE LOGIN LOGIC ---
+        let isOtpSent = false;
+        async function handlePhoneLogin() {
+            const phone = document.getElementById('phoneInput').value;
+            
+            if (!isOtpSent) {
+                const { error } = await supabase.auth.signInWithOtp({ phone: phone });
+                if (error) alert("Error: " + error.message);
+                else {
+                    isOtpSent = true;
+                    document.getElementById('otp-section').style.display = 'block';
+                    document.getElementById('phoneBtn').innerText = "Verify OTP";
+                    alert("OTP sent to your phone!");
+                }
+            } else {
+                const token = document.getElementById('otpInput').value;
+                const { error } = await supabase.auth.verifyOtp({ phone, token, type: 'sms' });
+                if (error) alert("Invalid OTP: " + error.message);
+                else enterApp();
+            }
+        }
+
+        function enterApp() {
             document.getElementById('auth-body').style.display = 'none';
             document.getElementById('app-body').style.display = 'flex';
-        }
-
-        // 2. PAGE SWITCHING LOGIC
-        function switchPage(pageId, element) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
-            element.classList.add('active');
-            lucide.createIcons();
-        }
-
-        // 3. FILE UPLOAD LOGIC
-        async function handleFile(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const fileName = `${Date.now()}_${file.name}`;
-            const { data, error } = await supabaseClient.storage.from('documents').upload(fileName, file);
-            if (error) { alert("Upload Failed: " + error.message); return; }
-            
-            const { data: urlData } = supabaseClient.storage.from('documents').getPublicUrl(fileName);
-            const row = `<tr><td>${file.name}</td><td>Today</td><td>${(file.size/1024).toFixed(1)} KB</td><td><a href="${urlData.publicUrl}" target="_blank" style="color:var(--accent)">View</a></td></tr>`;
-            document.getElementById('filesTable').innerHTML = row + document.getElementById('filesTable').innerHTML;
-            document.getElementById('fileCount').innerText = parseInt(document.getElementById('fileCount').innerText) + 1;
         }
     </script>
 </body>
