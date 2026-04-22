@@ -22,7 +22,6 @@
 
         body { background: var(--bg); color: var(--text); overflow-x: hidden; }
 
-        /* Sidebar Design */
         .sidebar {
             position: fixed; width: 260px; height: 100vh;
             background: var(--card); border-right: 1px solid rgba(255,255,255,0.1);
@@ -38,7 +37,6 @@
         }
         .nav-links li:hover, .nav-links li.active { background: var(--primary); }
 
-        /* Main Content */
         .main-content { margin-left: 260px; padding: 2rem; width: calc(100% - 260px); }
 
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; }
@@ -49,14 +47,12 @@
         }
         .search-box input { background: none; border: none; color: white; outline: none; width: 100%; }
 
-        /* Stats Cards */
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 3rem; }
         .stat-card { 
             background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
             padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);
         }
 
-        /* Upload Section */
         .upload-section {
             background: var(--card); border: 2px dashed var(--primary);
             padding: 3rem; border-radius: 20px; text-align: center; margin-bottom: 2rem;
@@ -64,7 +60,6 @@
         }
         .upload-section:hover { background: rgba(99, 102, 241, 0.05); }
 
-        /* File List Table */
         .file-list { background: var(--card); border-radius: 20px; padding: 1.5rem; }
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8; }
@@ -75,7 +70,6 @@
             padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer;
         }
 
-        /* Hide Auth Container initially for demo, show later */
         #app-body { display: none; }
         #auth-body { 
             height: 100vh; display: flex; justify-content: center; align-items: center; 
@@ -86,6 +80,16 @@
             padding: 3rem; border-radius: 24px; text-align: center; width: 400px;
             border: 1px solid rgba(255,255,255,0.1);
         }
+
+        /* Loading Spinner */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--accent);
+            border-radius: 50%; width: 20px; height: 20px;
+            animation: spin 1s linear infinite;
+            display: none; margin-left: 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -120,7 +124,10 @@
                     <i data-lucide="search"></i>
                     <input type="text" placeholder="Search your files...">
                 </div>
-                <button class="btn-upload" onclick="triggerUpload()"><i data-lucide="plus"></i> New Upload</button>
+                <div style="display: flex; align-items: center;">
+                    <button class="btn-upload" onclick="triggerUpload()"><i data-lucide="plus"></i> New Upload</button>
+                    <div id="uploadLoader" class="loader"></div>
+                </div>
             </header>
 
             <div class="stats-grid">
@@ -130,7 +137,7 @@
                 </div>
                 <div class="stat-card">
                     <p style="color: #94a3b8;">Storage Used</p>
-                    <h1>0.2 MB</h1>
+                    <h1 id="storageUsed">0 KB</h1>
                 </div>
                 <div class="stat-card">
                     <p style="color: #94a3b8;">Security Level</p>
@@ -156,23 +163,19 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody id="filesTable">
-                        </tbody>
+                    <tbody id="filesTable"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <script>
-        // Initialize Icons
         lucide.createIcons();
 
-        // --- Supabase Config ---
         const SB_URL = "https://sazdnbsestnlwxogxnfd.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhemRuYnNlc3RubHd4b2d4bmZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NjE0NzcsImV4cCI6MjA5MjQzNzQ3N30.erpQghV9yktpj1efrNMkgsTzY7ePJDYIZhU1E_3CHMs";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-        // UI Functions
         function showApp() {
             document.getElementById('auth-body').style.display = 'none';
             document.getElementById('app-body').style.display = 'flex';
@@ -182,24 +185,56 @@
             document.getElementById('fileInput').click();
         }
 
-        // File Handling
+        // --- REAL UPLOAD LOGIC ---
         async function handleFile(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            // Simple Local UI Update (Testing purpose)
-            const row = `<tr>
-                <td><i data-lucide="file" style="width:16px;"></i> ${file.name}</td>
-                <td>Just Now</td>
-                <td>${(file.size/1024).toFixed(2)} KB</td>
-                <td style="color:var(--accent); cursor:pointer;">Download</td>
-            </tr>`;
-            
-            document.getElementById('filesTable').innerHTML += row;
-            document.getElementById('fileCount').innerText = parseInt(document.getElementById('fileCount').innerText) + 1;
-            lucide.createIcons();
-            
-            alert("Professional Tip: Abhi Phase 1 Step 4 pending hai, isliye file backend par nahi sirf UI par dikhegi!");
+            const loader = document.getElementById('uploadLoader');
+            loader.style.display = 'block';
+
+            try {
+                // 1. Upload to Supabase Storage
+                const fileName = `${Date.now()}_${file.name}`;
+                const { data, error } = await supabaseClient
+                    .storage
+                    .from('documents') // Make sure your bucket name is 'documents'
+                    .upload(fileName, file);
+
+                if (error) throw error;
+
+                // 2. Get the public URL
+                const { data: urlData } = supabaseClient
+                    .storage
+                    .from('documents')
+                    .getPublicUrl(fileName);
+
+                const publicUrl = urlData.publicUrl;
+
+                // 3. Update Table
+                const table = document.getElementById('filesTable');
+                const row = `<tr>
+                    <td><i data-lucide="file" style="width:16px;"></i> ${file.name}</td>
+                    <td>${new Date().toLocaleDateString()}</td>
+                    <td>${(file.size/1024).toFixed(2)} KB</td>
+                    <td><a href="${publicUrl}" target="_blank" style="color:var(--accent); text-decoration:none; font-weight:600;">View</a></td>
+                </tr>`;
+                
+                table.innerHTML = row + table.innerHTML;
+                
+                // Update Stats
+                document.getElementById('fileCount').innerText = parseInt(document.getElementById('fileCount').innerText) + 1;
+                document.getElementById('storageUsed').innerText = (file.size/1024).toFixed(1) + " KB";
+                
+                lucide.createIcons();
+                alert("Success: File uploaded to your secure vault!");
+
+            } catch (err) {
+                console.error(err);
+                alert("Error: " + err.message + "\nCheck if Storage Policy is set to Public.");
+            } finally {
+                loader.style.display = 'none';
+            }
         }
     </script>
 </body>
