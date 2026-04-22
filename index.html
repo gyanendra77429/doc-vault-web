@@ -10,231 +10,167 @@
 
     <style>
         :root {
-            --primary: #6366f1;
-            --secondary: #4f46e5;
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #f8fafc;
-            --accent: #22d3ee;
+            --primary: #6366f1; --secondary: #4f46e5; --bg: #0f172a;
+            --card: #1e293b; --text: #f8fafc; --accent: #22d3ee;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg); color: var(--text); overflow: hidden; }
 
-        body { background: var(--bg); color: var(--text); overflow-x: hidden; }
-
+        /* Sidebar */
         .sidebar {
             position: fixed; width: 260px; height: 100vh;
             background: var(--card); border-right: 1px solid rgba(255,255,255,0.1);
             padding: 2rem; display: flex; flex-direction: column; gap: 2rem;
         }
-
         .logo { font-size: 1.5rem; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 10px; }
-
         .nav-links { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
         .nav-links li { 
             padding: 12px; border-radius: 10px; cursor: pointer; 
-            display: flex; align-items: center; gap: 12px; transition: 0.3s;
+            display: flex; align-items: center; gap: 12px; transition: 0.3s; color: #94a3b8;
         }
-        .nav-links li:hover, .nav-links li.active { background: var(--primary); }
+        .nav-links li:hover, .nav-links li.active { background: var(--primary); color: white; }
 
-        .main-content { margin-left: 260px; padding: 2rem; width: calc(100% - 260px); }
+        /* Content Area */
+        .main-content { margin-left: 260px; padding: 2rem; width: calc(100% - 260px); height: 100vh; overflow-y: auto; }
+        .page { display: none; }
+        .page.active { display: block; }
 
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; }
-
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
         .search-box {
             background: var(--card); border: 1px solid rgba(255,255,255,0.1);
             padding: 10px 20px; border-radius: 12px; display: flex; align-items: center; gap: 10px; width: 400px;
         }
         .search-box input { background: none; border: none; color: white; outline: none; width: 100%; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 3rem; }
-        .stat-card { 
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--card); padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
 
         .upload-section {
             background: var(--card); border: 2px dashed var(--primary);
-            padding: 3rem; border-radius: 20px; text-align: center; margin-bottom: 2rem;
-            cursor: pointer; transition: 0.3s;
+            padding: 2.5rem; border-radius: 20px; text-align: center; margin-bottom: 2rem; cursor: pointer;
         }
-        .upload-section:hover { background: rgba(99, 102, 241, 0.05); }
 
         .file-list { background: var(--card); border-radius: 20px; padding: 1.5rem; }
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8; }
+        th { text-align: left; padding: 1rem; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.1); }
         td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-        .btn-upload {
-            background: var(--accent); color: #000; font-weight: 600;
-            padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer;
-        }
+        .btn-upload { background: var(--accent); color: #000; font-weight: 600; padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; }
 
-        #app-body { display: none; }
-        #auth-body { 
-            height: 100vh; display: flex; justify-content: center; align-items: center; 
-            background: radial-gradient(circle at top right, #4f46e5, #0f172a);
-        }
-        .login-card { 
-            background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px);
-            padding: 3rem; border-radius: 24px; text-align: center; width: 400px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        /* Loading Spinner */
-        .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--accent);
-            border-radius: 50%; width: 20px; height: 20px;
-            animation: spin 1s linear infinite;
-            display: none; margin-left: 10px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Login */
+        #auth-body { height: 100vh; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle at top right, #4f46e5, #0f172a); }
+        .login-card { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); padding: 3rem; border-radius: 24px; text-align: center; width: 400px; border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
 
     <div id="auth-body">
         <div class="login-card">
-            <div class="logo" style="justify-content: center; margin-bottom: 1rem;">
-                <i data-lucide="shield-check"></i> DocVault Pro
-            </div>
-            <h2 style="margin-bottom: 2rem;">Welcome Back</h2>
-            <button class="btn-upload" style="width: 100%; margin-bottom: 1rem;" onclick="showApp()">
-                Continue to Dashboard
+            <div class="logo" style="justify-content: center; margin-bottom: 1rem;"><i data-lucide="shield-check"></i> DocVault Pro</div>
+            <h2 style="margin-bottom: 2rem;">Secure Login</h2>
+            <button class="btn-upload" style="width: 100%; margin-bottom: 1rem; justify-content: center;" onclick="loginWithGoogle()">
+                <i data-lucide="log-in"></i> Login with Google
             </button>
-            <p style="font-size: 0.8rem; color: #94a3b8;">Secure End-to-End Encryption Enabled</p>
+            <p style="font-size: 0.8rem; color: #94a3b8;">Use your Google account to sync files</p>
         </div>
     </div>
 
-    <div id="app-body">
+    <div id="app-body" style="display:none;">
         <div class="sidebar">
             <div class="logo"><i data-lucide="folder-lock"></i> DocVault</div>
             <ul class="nav-links">
-                <li class="active"><i data-lucide="layout-dashboard"></i> Dashboard</li>
-                <li><i data-lucide="file-text"></i> All Documents</li>
-                <li><i data-lucide="star"></i> Favorites</li>
-                <li><i data-lucide="settings"></i> Settings</li>
+                <li class="active" onclick="switchPage('dashboard', this)"><i data-lucide="layout-dashboard"></i> Dashboard</li>
+                <li onclick="switchPage('all-files', this)"><i data-lucide="file-text"></i> All Documents</li>
+                <li onclick="switchPage('favorites', this)"><i data-lucide="star"></i> Favorites</li>
+                <li onclick="switchPage('settings', this)"><i data-lucide="settings"></i> Settings</li>
             </ul>
         </div>
 
         <div class="main-content">
-            <header>
-                <div class="search-box">
-                    <i data-lucide="search"></i>
-                    <input type="text" placeholder="Search your files...">
+            <div id="dashboard" class="page active">
+                <header>
+                    <div class="search-box"><i data-lucide="search"></i><input type="text" placeholder="Search files..."></div>
+                    <button class="btn-upload" onclick="document.getElementById('fileInput').click()"><i data-lucide="plus"></i> New Upload</button>
+                </header>
+                <div class="stats-grid">
+                    <div class="stat-card"><p>Total Files</p><h1 id="fileCount">0</h1></div>
+                    <div class="stat-card"><p>Storage</p><h1>Cloud Active</h1></div>
+                    <div class="stat-card"><p>Security</p><h1 style="color: #4ade80;">Locked</h1></div>
                 </div>
-                <div style="display: flex; align-items: center;">
-                    <button class="btn-upload" onclick="triggerUpload()"><i data-lucide="plus"></i> New Upload</button>
-                    <div id="uploadLoader" class="loader"></div>
+                <div class="upload-section" onclick="document.getElementById('fileInput').click()">
+                    <i data-lucide="cloud-upload" style="width: 40px; height: 40px; color: var(--primary);"></i>
+                    <h3>Tap to Upload Document</h3>
+                    <input type="file" id="fileInput" hidden onchange="handleFile(event)">
                 </div>
-            </header>
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <p style="color: #94a3b8;">Total Files</p>
-                    <h1 id="fileCount">0</h1>
-                </div>
-                <div class="stat-card">
-                    <p style="color: #94a3b8;">Storage Used</p>
-                    <h1 id="storageUsed">0 KB</h1>
-                </div>
-                <div class="stat-card">
-                    <p style="color: #94a3b8;">Security Level</p>
-                    <h1 style="color: #4ade80;">Maximum</h1>
+                <div class="file-list">
+                    <h3>Recent Uploads</h3>
+                    <table>
+                        <thead><tr><th>Name</th><th>Date</th><th>Size</th><th>Action</th></tr></thead>
+                        <tbody id="filesTable"></tbody>
+                    </table>
                 </div>
             </div>
 
-            <div class="upload-section" id="dropZone" onclick="document.getElementById('fileInput').click()">
-                <i data-lucide="cloud-upload" style="width: 48px; height: 48px; color: var(--primary);"></i>
-                <h3>Drag & Drop Files Here</h3>
-                <p style="color: #94a3b8;">Supported formats: PDF, PNG, JPG, DOCX</p>
-                <input type="file" id="fileInput" hidden onchange="handleFile(event)">
-            </div>
-
-            <div class="file-list">
-                <h3>Recent Documents</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>File Name</th>
-                            <th>Date</th>
-                            <th>Size</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="filesTable"></tbody>
-                </table>
-            </div>
+            <div id="all-files" class="page"><h1>All Documents</h1><p>List of all your synced files.</p></div>
+            <div id="favorites" class="page"><h1>Favorites</h1><p>Your starred documents will appear here.</p></div>
+            <div id="settings" class="page"><h1>Settings</h1><button class="btn-upload" style="background:#ef4444; color:white;" onclick="location.reload()">Logout</button></div>
         </div>
     </div>
 
     <script>
         lucide.createIcons();
 
+        // CONFIG (Check if these are correct)
         const SB_URL = "https://sazdnbsestnlwxogxnfd.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhemRuYnNlc3RubHd4b2d4bmZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NjE0NzcsImV4cCI6MjA5MjQzNzQ3N30.erpQghV9yktpj1efrNMkgsTzY7ePJDYIZhU1E_3CHMs";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-        function showApp() {
+        // 1. LOGIN LOGIC
+        async function loginWithGoogle() {
+            const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.href }
+            });
+            if (error) alert("Login Error: " + error.message);
+        }
+
+        // Check if user is already logged in (Simulated for GitHub Pages)
+        window.onload = async () => {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (user) {
+                document.getElementById('auth-body').style.display = 'none';
+                document.getElementById('app-body').style.display = 'flex';
+            }
+        };
+
+        // Temporary bypass button logic (since Google Login needs extra setup)
+        function showApp() { 
             document.getElementById('auth-body').style.display = 'none';
             document.getElementById('app-body').style.display = 'flex';
         }
 
-        function triggerUpload() {
-            document.getElementById('fileInput').click();
+        // 2. PAGE SWITCHING LOGIC
+        function switchPage(pageId, element) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
+            element.classList.add('active');
+            lucide.createIcons();
         }
 
-        // --- REAL UPLOAD LOGIC ---
+        // 3. FILE UPLOAD LOGIC
         async function handleFile(event) {
             const file = event.target.files[0];
             if (!file) return;
-
-            const loader = document.getElementById('uploadLoader');
-            loader.style.display = 'block';
-
-            try {
-                // 1. Upload to Supabase Storage
-                const fileName = `${Date.now()}_${file.name}`;
-                const { data, error } = await supabaseClient
-                    .storage
-                    .from('documents') // Make sure your bucket name is 'documents'
-                    .upload(fileName, file);
-
-                if (error) throw error;
-
-                // 2. Get the public URL
-                const { data: urlData } = supabaseClient
-                    .storage
-                    .from('documents')
-                    .getPublicUrl(fileName);
-
-                const publicUrl = urlData.publicUrl;
-
-                // 3. Update Table
-                const table = document.getElementById('filesTable');
-                const row = `<tr>
-                    <td><i data-lucide="file" style="width:16px;"></i> ${file.name}</td>
-                    <td>${new Date().toLocaleDateString()}</td>
-                    <td>${(file.size/1024).toFixed(2)} KB</td>
-                    <td><a href="${publicUrl}" target="_blank" style="color:var(--accent); text-decoration:none; font-weight:600;">View</a></td>
-                </tr>`;
-                
-                table.innerHTML = row + table.innerHTML;
-                
-                // Update Stats
-                document.getElementById('fileCount').innerText = parseInt(document.getElementById('fileCount').innerText) + 1;
-                document.getElementById('storageUsed').innerText = (file.size/1024).toFixed(1) + " KB";
-                
-                lucide.createIcons();
-                alert("Success: File uploaded to your secure vault!");
-
-            } catch (err) {
-                console.error(err);
-                alert("Error: " + err.message + "\nCheck if Storage Policy is set to Public.");
-            } finally {
-                loader.style.display = 'none';
-            }
+            const fileName = `${Date.now()}_${file.name}`;
+            const { data, error } = await supabaseClient.storage.from('documents').upload(fileName, file);
+            if (error) { alert("Upload Failed: " + error.message); return; }
+            
+            const { data: urlData } = supabaseClient.storage.from('documents').getPublicUrl(fileName);
+            const row = `<tr><td>${file.name}</td><td>Today</td><td>${(file.size/1024).toFixed(1)} KB</td><td><a href="${urlData.publicUrl}" target="_blank" style="color:var(--accent)">View</a></td></tr>`;
+            document.getElementById('filesTable').innerHTML = row + document.getElementById('filesTable').innerHTML;
+            document.getElementById('fileCount').innerText = parseInt(document.getElementById('fileCount').innerText) + 1;
         }
     </script>
 </body>
