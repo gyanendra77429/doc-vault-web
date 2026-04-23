@@ -11,115 +11,108 @@
     <style>
         :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #22d3ee; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
 
+        /* Auth Screen */
+        #auth-body { height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at top right, #4f46e5, #0f172a); }
         .login-card { background: rgba(30, 41, 59, 0.9); backdrop-filter: blur(15px); padding: 2.5rem; border-radius: 28px; width: 420px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
         .logo { font-size: 1.8rem; font-weight: 700; color: var(--accent); margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        
         .input-group { margin-top: 1.5rem; text-align: left; }
         input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #0f172a; color: white; outline: none; margin-top: 8px; }
-        
         .btn-main { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--primary); color: white; font-weight: 700; cursor: pointer; margin-top: 1.5rem; transition: 0.3s; }
         .btn-google { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: white; font-weight: 500; cursor: pointer; margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
-        .btn-google:hover { background: rgba(255,255,255,0.05); }
-
         .divider { margin: 1.5rem 0; display: flex; align-items: center; color: #64748b; font-size: 0.8rem; }
         .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.1); margin: 0 10px; }
+
+        /* Dashboard Screen (Hidden by default) */
+        #app-body { height: 100vh; width: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-    <div id="auth-container">
+    <div id="auth-body">
         <div class="login-card">
             <div class="logo"><i data-lucide="shield-check"></i> DocVault</div>
             <p style="color: #94a3b8;">Choose your secure login method</p>
-
             <button class="btn-google" onclick="loginWithGoogle()">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
                 Continue with Google
             </button>
-
             <div class="divider">OR USE EMAIL</div>
-
             <div class="input-group">
                 <input type="email" id="emailInput" placeholder="Enter your email address">
             </div>
             <button class="btn-main" onclick="handleEmailAuth()">Send Magic Link / Login</button>
-            
-            <p style="margin-top: 1.5rem; font-size: 0.75rem; color: #64748b;">
-                By continuing, you agree to our Cloud Security Terms.
-            </p>
         </div>
+    </div>
+
+    <div id="app-body">
+        <h1 style="color: var(--accent);">Welcome to Your Vault</h1>
+        <p id="user-email" style="margin: 10px 0; color: #94a3b8;"></p>
+        <button class="btn-main" style="width: 200px; background: #ef4444;" onclick="handleLogout()">Logout</button>
     </div>
 
     <script>
         lucide.createIcons();
 
-        // Supabase Config
         const SB_URL = "https://sazdnbsestnlwxogxnfd.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhemRuYnNlc3RubHd4b2d4bmZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NjE0NzcsImV4cCI6MjA5MjQzNzQ3N30.erpQghV9yktpj1efrNMkgsTzY7ePJDYIZhU1E_3CHMs";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-        // 1. Google Login Function
         async function loginWithGoogle() {
-    const currentUrl = window.location.origin + window.location.pathname;
-    
-    const { error } = await supabaseClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-            redirectTo: currentUrl
+            const currentUrl = window.location.origin + window.location.pathname;
+            const { error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: currentUrl }
+            });
+            if (error) alert("Google Error: " + error.message);
         }
-    });
-    if (error) alert("Google Error: " + error.message);
-}
 
-        // 2. Email Magic Link Function
         async function handleEmailAuth() {
-    const email = document.getElementById('emailInput').value;
-    if (!email) { alert("Please enter email"); return; }
-
-    // Ye line aapki repository ka sahi link khud nikal legi
-    const currentUrl = window.location.origin + window.location.pathname;
-
-    const { error } = await supabaseClient.auth.signInWithOtp({
-        email: email,
-        options: {
-            emailRedirectTo: currentUrl 
+            const email = document.getElementById('emailInput').value;
+            if (!email) { alert("Please enter email"); return; }
+            const currentUrl = window.location.origin + window.location.pathname;
+            const { error } = await supabaseClient.auth.signInWithOtp({
+                email: email,
+                options: { emailRedirectTo: currentUrl }
+            });
+            if (error) alert("Error: " + error.message);
+            else alert("Magic Link sent! Check your email.");
         }
-    });
 
-    if (error) alert("Error: " + error.message);
-    else alert("Magic Link sent! Please check your email.");
-}
-
-        // 3. Check Session on Load
-       window.onload = async () => {
-    // 1. Pehle check karein ki kya session pehle se hai
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) {
-        showDashboard();
-    }
-
-    // 2. Ye listener login hote hi turant dashboard open kar dega
-    supabaseClient.auth.onAuthStateChange((event, session) => {
-        if (session) {
-            showDashboard();
-        } else {
-            showLogin();
+        async function handleLogout() {
+            await supabaseClient.auth.signOut();
+            location.reload();
         }
-    });
-};
 
-function showDashboard() {
-    document.getElementById('auth-body').style.display = 'none';
-    document.getElementById('app-body').style.display = 'flex';
-    lucide.createIcons();
-}
+        function showDashboard(user) {
+            document.getElementById('auth-body').style.display = 'none';
+            document.getElementById('app-body').style.display = 'flex';
+            document.getElementById('user-email').innerText = "Logged in as: " + user.email;
+            lucide.createIcons();
+        }
 
-function showLogin() {
-    document.getElementById('auth-body').style.display = 'flex';
-    document.getElementById('app-body').style.display = 'none';
-}
+        function showLogin() {
+            document.getElementById('auth-body').style.display = 'flex';
+            document.getElementById('app-body').style.display = 'none';
+            lucide.createIcons();
+        }
+
+        // --- THE FIX: Smart Session Checker ---
+        window.onload = async () => {
+            // Check current session
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) showDashboard(session.user);
+
+            // Listen for state changes (Google redirect se aane par ye trigger hoga)
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_IN' && session) {
+                    showDashboard(session.user);
+                } else if (event === 'SIGNED_OUT') {
+                    showLogin();
+                }
+            });
+        };
     </script>
 </body>
 </html>
