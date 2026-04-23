@@ -62,14 +62,18 @@
 
         // 1. Google Login Function
         async function loginWithGoogle() {
-            const { error } = await supabaseClient.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: window.location.origin // APK mein ye automatic handle hota hai
-                }
-            });
-            if (error) alert("Google Error: " + error.message);
+    // Ye line automatic aapka sahi link pakad legi (GitHub wala)
+    const currentUrl = window.location.origin + window.location.pathname;
+    
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: currentUrl // Ab ye localhost par nahi jayega
         }
+    });
+    
+    if (error) alert("Google Error: " + error.message);
+}
 
         // 2. Email Magic Link Function
         async function handleEmailAuth() {
