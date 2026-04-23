@@ -10,141 +10,139 @@
 
     <style>
         :root { 
-            --primary: #4f46e5; 
-            --bg: #f8fafc; 
-            --card: #ffffff; 
-            --text: #1e293b; 
-            --accent: #6366f1;
-            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --primary: #4f46e5; --bg: #f8fafc; --card: #ffffff; 
+            --text: #1e293b; --accent: #6366f1; --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: var(--bg); color: var(--text); min-height: 100vh; }
+        body { background: var(--bg); color: var(--text); overflow-x: hidden; }
 
-        /* --- AUTH SECTION (Light Theme) --- */
-        #auth-body { height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%); }
-        .login-card { background: var(--card); padding: 3rem; border-radius: 30px; width: 100%; max-width: 420px; box-shadow: var(--shadow); text-align: center; border: 1px solid #e2e8f0; }
-        .dev-badge { background: #e0e7ff; color: var(--primary); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; margin-bottom: 1rem; display: inline-block; }
+        /* --- MOBILE HEADER --- */
+        .mobile-header { display: none; background: var(--card); padding: 15px 20px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; justify-content: space-between; align-items: center; }
         
-        /* --- DASHBOARD LAYOUT --- */
-        #app-body { display: none; display: flex; }
-        .sidebar { width: 280px; background: var(--card); border-right: 1px solid #e2e8f0; padding: 2rem; height: 100vh; position: fixed; display: flex; flex-direction: column; }
-        .main-content { margin-left: 280px; padding: 2rem; width: calc(100% - 280px); }
-
+        /* --- SIDEBAR --- */
+        .sidebar { width: 280px; background: var(--card); border-right: 1px solid #e2e8f0; padding: 2rem; height: 100vh; position: fixed; left: 0; top: 0; display: flex; flex-direction: column; z-index: 1000; transition: 0.3s; }
+        .sidebar.hidden { transform: translateX(-100%); }
         .logo { font-size: 1.6rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; margin-bottom: 2.5rem; }
         
         .nav-links { list-style: none; flex-grow: 1; }
-        .nav-links li { padding: 14px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; color: #64748b; font-weight: 500; transition: 0.3s; margin-bottom: 5px; }
-        .nav-links li:hover, .nav-links li.active { background: #f1f5f9; color: var(--primary); }
+        .nav-links li { padding: 12px 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; color: #64748b; margin-bottom: 5px; transition: 0.3s; }
+        .nav-links li:hover, .nav-links li.active { background: #f1f5f9; color: var(--primary); font-weight: 600; }
 
-        /* Developer Footer in Sidebar */
-        .sidebar-footer { border-top: 1px solid #f1f5f9; padding-top: 1.5rem; }
-        .dev-info { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
-        .dev-avatar { width: 35px; height: 35px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+        .main-content { margin-left: 280px; padding: 2rem; transition: 0.3s; }
 
-        /* ADVERTISEMENT BANNER */
-        .ad-banner { background: linear-gradient(90deg, #4f46e5, #818cf8); color: white; padding: 1.5rem; border-radius: 20px; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2); }
-        .ad-content h4 { font-size: 1.1rem; margin-bottom: 5px; }
-        .ad-btn { background: white; color: var(--primary); padding: 8px 20px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 0.9rem; }
+        /* --- ADVERTISEMENT SLOTS --- */
+        .ad-space { background: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: 15px; text-align: center; padding: 20px; margin: 20px 0; color: #94a3b8; font-size: 0.8rem; overflow: hidden; }
+        .ad-banner-top { background: linear-gradient(90deg, #4f46e5, #818cf8); color: white; padding: 20px; border-radius: 20px; margin-bottom: 2rem; }
 
-        /* COMPONENTS */
-        .upload-box { background: white; border: 2px dashed #cbd5e1; padding: 2.5rem; border-radius: 24px; text-align: center; transition: 0.3s; cursor: pointer; margin-bottom: 2rem; }
-        .upload-box:hover { border-color: var(--primary); background: #f8fafc; }
-        
-        .btn-primary { background: var(--primary); color: white; padding: 12px 25px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2); }
+        /* --- SECTION SWITCHER --- */
+        .app-section { display: none; }
+        .app-section.active { display: block; }
 
-        .file-card { background: white; border-radius: 20px; padding: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th { text-align: left; padding: 12px; color: #64748b; font-size: 0.9rem; border-bottom: 2px solid #f1f5f9; }
-        td { padding: 15px 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
+        /* --- UI COMPONENTS --- */
+        .glass-card { background: white; padding: 2rem; border-radius: 24px; box-shadow: var(--shadow); border: 1px solid #e2e8f0; }
+        .btn-primary { background: var(--primary); color: white; padding: 12px 24px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        input, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 8px; outline: none; }
 
+        /* --- RESPONSIVE FIXES --- */
         @media (max-width: 768px) {
-            .sidebar { display: none; }
+            .mobile-header { display: flex; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
             .main-content { margin-left: 0; padding: 1.5rem; }
         }
     </style>
 </head>
 <body>
 
-    <div id="auth-body">
-        <div class="login-card">
-            <span class="dev-badge">Gyanendra Singh Edition</span>
-            <div class="logo" style="justify-content: center;"><i data-lucide="layers"></i> DocVault</div>
-            <p style="color: #64748b; margin-bottom: 2rem;">Securely manage your personal documents</p>
-            
-            <button onclick="loginWithGoogle()" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; margin-bottom: 1rem;">
+    <div id="auth-body" style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #f8fafc;">
+        <div style="background: white; padding: 3rem; border-radius: 30px; width: 90%; max-width: 400px; text-align: center; box-shadow: var(--shadow);">
+            <div style="background: #e0e7ff; color: var(--primary); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; margin-bottom: 1rem; display: inline-block;">Gyanendra Singh Edition</div>
+            <h2 style="color: var(--primary); margin-bottom: 2rem;">DocVault Login</h2>
+            <button onclick="loginWithGoogle()" style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600;">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Continue with Google
             </button>
-
-            <div style="margin: 1.5rem 0; color: #cbd5e1;">── OR ──</div>
-            <input type="email" id="emailInput" placeholder="Enter email" style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 1rem;">
-            <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="handleEmailAuth()">Get Access Link</button>
         </div>
     </div>
 
-    <div id="app-body">
-        <aside class="sidebar">
+    <div id="app-body" style="display: none;">
+        <header class="mobile-header">
+            <div class="logo" style="margin-bottom: 0;"><i data-lucide="layers"></i> Vault</div>
+            <button id="menuToggle" style="background: none; border: none;"><i data-lucide="menu"></i></button>
+        </header>
+
+        <aside class="sidebar" id="sidebar">
             <div class="logo"><i data-lucide="layers"></i> DocVault</div>
             <ul class="nav-links">
-                <li class="active"><i data-lucide="home"></i> Dashboard</li>
-                <li><i data-lucide="file-text"></i> My Documents</li>
-                <li><i data-lucide="star"></i> Favorites</li>
-                <li><i data-lucide="settings"></i> Settings</li>
+                <li class="active" onclick="switchSection('dashboard', this)"><i data-lucide="home"></i> Dashboard</li>
+                <li onclick="switchSection('files', this)"><i data-lucide="file-text"></i> My Files</li>
+                <li onclick="switchSection('settings', this)"><i data-lucide="settings"></i> Settings</li>
+                <li onclick="switchSection('support', this)"><i data-lucide="help-circle"></i> Contact Support</li>
             </ul>
+            
+            <div class="ad-space" style="height: 150px;">
+                <p>Advertisement Space</p>
+                <small>Contact Gyanendra for Ads</small>
+            </div>
 
-            <div class="sidebar-footer">
-                <div class="dev-info">
-                    <div class="dev-avatar">GS</div>
-                    <div>
-                        <p style="font-weight: 700;">Gyanendra Singh</p>
-                        <p style="color: #64748b; font-size: 0.75rem;">Lead Developer</p>
-                    </div>
-                </div>
-                <button onclick="handleLogout()" style="margin-top: 1.5rem; background: none; border: none; color: #ef4444; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                    <i data-lucide="log-out" size="18"></i> Logout
-                </button>
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 1.5rem;">
+                <p style="font-weight: 700; font-size: 0.9rem;">Gyanendra Singh</p>
+                <p style="color: #64748b; font-size: 0.75rem;">Lead Developer</p>
+                <button onclick="handleLogout()" style="margin-top: 1rem; color: #ef4444; border: none; background: none; cursor: pointer;">Logout</button>
             </div>
         </aside>
 
         <main class="main-content">
-            <div class="ad-banner">
-                <div class="ad-content">
-                    <h4>🚀 Premium Hosting for Developers</h4>
-                    <p style="font-size: 0.85rem; opacity: 0.9;">Ad: Check out Gyanendra's other projects on GitHub!</p>
+            <div class="ad-banner-top">
+                <h3>🚀 DocVault Premium Ad Space</h3>
+                <p>Grow your business here. Place your advertisement now!</p>
+            </div>
+
+            <section id="dashboard" class="app-section active">
+                <header style="margin-bottom: 2rem;">
+                    <h1>Hello Developer!</h1>
+                    <p style="color: #64748b;">Manage your secure documents efficiently.</p>
+                </header>
+
+                <div class="glass-card" style="border: 2px dashed #cbd5e1; text-align: center; cursor: pointer;" onclick="document.getElementById('fileInput').click()">
+                    <i data-lucide="upload-cloud" size="48" color="#4f46e5"></i>
+                    <h3 style="margin-top: 1rem;">Click here to upload files</h3>
+                    <input type="file" id="fileInput" hidden onchange="handleFileUpload(event)">
                 </div>
-                <a href="https://github.com/gyanendra77429" target="_blank" class="ad-btn">Learn More</a>
-            </div>
+            </section>
 
-            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <div>
-                    <h1 style="font-size: 1.8rem;">Cloud Storage</h1>
-                    <p style="color: #64748b;">Manage your vault securely</p>
+            <section id="files" class="app-section">
+                <h2>Your Secure Files</h2>
+                <div class="glass-card" style="margin-top: 1.5rem; overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead><tr style="text-align: left; color: #64748b;"><th>Name</th><th>Size</th><th>Action</th></tr></thead>
+                        <tbody id="fileList"></tbody>
+                    </table>
                 </div>
-                <button class="btn-primary" onclick="document.getElementById('fileInput').click()"><i data-lucide="plus"></i> New Upload</button>
-            </header>
+            </section>
 
-            <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-                <i data-lucide="upload-cloud" style="width: 48px; height: 48px; color: var(--primary); margin-bottom: 1rem;"></i>
-                <h3 style="margin-bottom: 8px;">Drop files here or click to upload</h3>
-                <p style="color: #94a3b8; font-size: 0.9rem;">Maximum file size: 50MB</p>
-                <input type="file" id="fileInput" hidden onchange="handleFileUpload(event)">
-            </div>
+            <section id="settings" class="app-section">
+                <h2>App Settings</h2>
+                <div class="glass-card" style="margin-top: 1.5rem;">
+                    <p><strong>App Name:</strong> DocVault v2.0</p>
+                    <p><strong>Developed By:</strong> Gyanendra Singh</p>
+                    <button class="btn-primary" style="margin-top: 1rem;">Update Profile</button>
+                </div>
+            </section>
 
-            <div class="file-card">
-                <h3 style="margin-bottom: 1.5rem;">Recent Documents</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>File Name</th>
-                            <th>Size</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="fileList">
-                        </tbody>
-                </table>
-            </div>
+            <section id="support" class="app-section">
+                <h2>Contact Support</h2>
+                <div class="glass-card" style="margin-top: 1.5rem;">
+                    <p>Facing any issue? Contact Gyanendra Singh directly.</p>
+                    <div style="margin-top: 1rem;">
+                        <label>Your Message</label>
+                        <textarea id="supportMsg" rows="4" placeholder="How can I help you?"></textarea>
+                        <button class="btn-primary" style="margin-top: 1rem; width: 100%; justify-content: center;" onclick="sendSupportEmail()">
+                            <i data-lucide="mail"></i> Send to Gyanendra
+                        </button>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -155,24 +153,27 @@
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhemRuYnNlc3RubHd4b2d4bmZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NjE0NzcsImV4cCI6MjA5MjQzNzQ3N30.erpQghV9yktpj1efrNMkgsTzY7ePJDYIZhU1E_3CHMs";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-        // --- AUTH FUNCTIONS ---
-        async function loginWithGoogle() {
-            const currentUrl = window.location.origin + window.location.pathname;
-            await supabaseClient.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: currentUrl }
-            });
+        // --- NAVIGATION LOGIC ---
+        function switchSection(id, element) {
+            document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-links li').forEach(l => l.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            element.classList.add('active');
+            
+            // Close sidebar on mobile after click
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('active');
+            }
         }
 
-        async function handleEmailAuth() {
-            const email = document.getElementById('emailInput').value;
-            if(!email) return alert("Enter email");
-            const currentUrl = window.location.origin + window.location.pathname;
-            const { error } = await supabaseClient.auth.signInWithOtp({
-                email,
-                options: { emailRedirectTo: currentUrl }
-            });
-            if(!error) alert("Magic link sent to your inbox!");
+        // Mobile Menu Toggle
+        document.getElementById('menuToggle').onclick = () => {
+            document.getElementById('sidebar').classList.toggle('active');
+        };
+
+        // --- AUTH & FILES ---
+        async function loginWithGoogle() {
+            await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
         }
 
         async function handleLogout() {
@@ -180,58 +181,33 @@
             location.reload();
         }
 
-        // --- FILE FUNCTIONS ---
+        function sendSupportEmail() {
+            const msg = document.getElementById('supportMsg').value;
+            window.location.href = `mailto:gyanendrasingh77429@gmail.com?subject=DocVault Support Request&body=${msg}`;
+        }
+
         async function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-
+            alert("Uploading " + file.name + "... Please wait.");
+            // (Same Supabase upload logic here)
             const { data: { user } } = await supabaseClient.auth.getUser();
             const fileName = `${user.id}/${Date.now()}_${file.name}`;
-
-            const { data, error } = await supabaseClient.storage
-                .from('documents')
-                .upload(fileName, file);
-
-            if (error) {
-                alert("Upload failed: " + error.message);
-            } else {
+            const { error } = await supabaseClient.storage.from('documents').upload(fileName, file);
+            if(!error) {
                 const { data: urlData } = supabaseClient.storage.from('documents').getPublicUrl(fileName);
-                addFileToTable(file.name, file.size, urlData.publicUrl);
+                document.getElementById('fileList').innerHTML += `<tr><td>${file.name}</td><td>Ready</td><td><a href="${urlData.publicUrl}" target="_blank">View</a></td></tr>`;
             }
         }
 
-        function addFileToTable(name, size, url) {
-            const row = `<tr>
-                <td style="font-weight: 500;"><i data-lucide="file" size="16" style="vertical-align: middle; margin-right: 8px;"></i> ${name}</td>
-                <td style="color: #64748b;">${(size/1024).toFixed(1)} KB</td>
-                <td><span style="background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem;">Secure</span></td>
-                <td><a href="${url}" target="_blank" style="color:var(--primary); font-weight: 700; text-decoration: none;">View</a></td>
-            </tr>`;
-            document.getElementById('fileList').innerHTML = row + document.getElementById('fileList').innerHTML;
-            lucide.createIcons();
-        }
-
-        // --- INITIALIZE ---
         window.onload = async () => {
             const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) showApp();
-
-            supabaseClient.auth.onAuthStateChange((event, session) => {
-                if (session) showApp();
-                else showLogin();
-            });
-        };
-
-        function showApp() {
-            document.getElementById('auth-body').style.display = 'none';
-            document.getElementById('app-body').style.display = 'flex';
+            if (session) {
+                document.getElementById('auth-body').style.display = 'none';
+                document.getElementById('app-body').style.display = 'block';
+            }
             lucide.createIcons();
-        }
-
-        function showLogin() {
-            document.getElementById('auth-body').style.display = 'flex';
-            document.getElementById('app-body').style.display = 'none';
-        }
+        };
     </script>
 </body>
 </html>
