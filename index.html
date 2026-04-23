@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocVault Pro | Ultra Secure</title>
+    <title>DocVault Pro | Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,21 +11,38 @@
     <style>
         :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #22d3ee; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; }
 
-        /* Auth Screen */
-        #auth-body { height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at top right, #4f46e5, #0f172a); }
-        .login-card { background: rgba(30, 41, 59, 0.9); backdrop-filter: blur(15px); padding: 2.5rem; border-radius: 28px; width: 420px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        /* AUTH SCREEN */
+        #auth-body { height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at top right, #4f46e5, #0f172a); }
+        .login-card { background: rgba(30, 41, 59, 0.9); backdrop-filter: blur(15px); padding: 2.5rem; border-radius: 28px; width: 100%; max-width: 420px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
         .logo { font-size: 1.8rem; font-weight: 700; color: var(--accent); margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .input-group { margin-top: 1.5rem; text-align: left; }
-        input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #0f172a; color: white; outline: none; margin-top: 8px; }
-        .btn-main { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--primary); color: white; font-weight: 700; cursor: pointer; margin-top: 1.5rem; transition: 0.3s; }
-        .btn-google { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: white; font-weight: 500; cursor: pointer; margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
+        .btn-google { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: white; font-weight: 500; cursor: pointer; margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .divider { margin: 1.5rem 0; display: flex; align-items: center; color: #64748b; font-size: 0.8rem; }
         .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.1); margin: 0 10px; }
+        input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #0f172a; color: white; outline: none; margin-top: 8px; }
 
-        /* Dashboard Screen (Hidden by default) */
-        #app-body { height: 100vh; width: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        /* DASHBOARD SCREEN */
+        #app-body { display: none; min-height: 100vh; }
+        .sidebar { width: 260px; background: var(--card); border-right: 1px solid rgba(255,255,255,0.1); padding: 2rem; position: fixed; height: 100vh; }
+        .main-content { margin-left: 260px; padding: 2rem; width: calc(100% - 260px); }
+        
+        .nav-links { list-style: none; margin-top: 2rem; }
+        .nav-links li { padding: 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 12px; color: #94a3b8; transition: 0.3s; }
+        .nav-links li:hover, .nav-links li.active { background: var(--primary); color: white; }
+
+        .stat-card { background: var(--card); padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .upload-area { background: var(--card); border: 2px dashed var(--primary); padding: 3rem; border-radius: 20px; text-align: center; margin: 2rem 0; cursor: pointer; }
+        
+        .btn-main { background: var(--accent); color: #000; font-weight: 700; padding: 12px 24px; border-radius: 12px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; background: var(--card); border-radius: 15px; overflow: hidden; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -33,23 +50,46 @@
     <div id="auth-body">
         <div class="login-card">
             <div class="logo"><i data-lucide="shield-check"></i> DocVault</div>
-            <p style="color: #94a3b8;">Choose your secure login method</p>
             <button class="btn-google" onclick="loginWithGoogle()">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
-                Continue with Google
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Continue with Google
             </button>
-            <div class="divider">OR USE EMAIL</div>
-            <div class="input-group">
-                <input type="email" id="emailInput" placeholder="Enter your email address">
-            </div>
-            <button class="btn-main" onclick="handleEmailAuth()">Send Magic Link / Login</button>
+            <div class="divider">OR</div>
+            <input type="email" id="emailInput" placeholder="Email Address">
+            <button class="btn-main" style="width: 100%; margin-top: 1rem; justify-content: center;" onclick="handleEmailAuth()">Send Magic Link</button>
         </div>
     </div>
 
     <div id="app-body">
-        <h1 style="color: var(--accent);">Welcome to Your Vault</h1>
-        <p id="user-email" style="margin: 10px 0; color: #94a3b8;"></p>
-        <button class="btn-main" style="width: 200px; background: #ef4444;" onclick="handleLogout()">Logout</button>
+        <div class="sidebar">
+            <div class="logo"><i data-lucide="folder-lock"></i> DocVault</div>
+            <ul class="nav-links">
+                <li class="active"><i data-lucide="layout-dashboard"></i> Dashboard</li>
+                <li><i data-lucide="file-text"></i> My Files</li>
+                <li onclick="handleLogout()" style="color: #ef4444; margin-top: 2rem;"><i data-lucide="log-out"></i> Logout</li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <header style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Welcome back!</h2>
+                <button class="btn-main" onclick="document.getElementById('fileInput').click()"><i data-lucide="plus"></i> Upload</button>
+            </header>
+
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <i data-lucide="cloud-upload" style="width: 48px; height: 48px; color: var(--accent); margin-bottom: 1rem;"></i>
+                <h3>Tap to upload your documents</h3>
+                <p style="color: #64748b;">PDF, Images or Docs</p>
+                <input type="file" id="fileInput" hidden onchange="handleFileUpload(event)">
+            </div>
+
+            <div style="background: var(--card); padding: 1.5rem; border-radius: 20px;">
+                <h3>Recent Files</h3>
+                <table>
+                    <thead><tr><th>Name</th><th>Size</th><th>Link</th></tr></thead>
+                    <tbody id="fileList"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -59,25 +99,21 @@
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhemRuYnNlc3RubHd4b2d4bmZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NjE0NzcsImV4cCI6MjA5MjQzNzQ3N30.erpQghV9yktpj1efrNMkgsTzY7ePJDYIZhU1E_3CHMs";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
+        // LOGIN LOGIC
         async function loginWithGoogle() {
-            const currentUrl = window.location.origin + window.location.pathname;
             const { error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
-                options: { redirectTo: currentUrl }
+                options: { redirectTo: window.location.origin + window.location.pathname }
             });
-            if (error) alert("Google Error: " + error.message);
         }
 
         async function handleEmailAuth() {
             const email = document.getElementById('emailInput').value;
-            if (!email) { alert("Please enter email"); return; }
-            const currentUrl = window.location.origin + window.location.pathname;
             const { error } = await supabaseClient.auth.signInWithOtp({
-                email: email,
-                options: { emailRedirectTo: currentUrl }
+                email,
+                options: { emailRedirectTo: window.location.origin + window.location.pathname }
             });
-            if (error) alert("Error: " + error.message);
-            else alert("Magic Link sent! Check your email.");
+            if(!error) alert("Magic link sent!");
         }
 
         async function handleLogout() {
@@ -85,34 +121,56 @@
             location.reload();
         }
 
-        function showDashboard(user) {
+        // UPLOAD LOGIC
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const { data: userData } = await supabaseClient.auth.getUser();
+            const fileName = `${userData.user.id}/${Date.now()}_${file.name}`;
+
+            const { data, error } = await supabaseClient.storage
+                .from('documents')
+                .upload(fileName, file);
+
+            if (error) {
+                alert("Upload failed: " + error.message);
+            } else {
+                const { data: urlData } = supabaseClient.storage.from('documents').getPublicUrl(fileName);
+                addFileToTable(file.name, file.size, urlData.publicUrl);
+            }
+        }
+
+        function addFileToTable(name, size, url) {
+            const row = `<tr>
+                <td>${name}</td>
+                <td>${(size/1024).toFixed(1)} KB</td>
+                <td><a href="${url}" target="_blank" style="color:var(--accent)">View</a></td>
+            </tr>`;
+            document.getElementById('fileList').innerHTML += row;
+        }
+
+        // SESSION CHECK
+        window.onload = async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) showApp();
+
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (session) showApp();
+                else showLogin();
+            });
+        };
+
+        function showApp() {
             document.getElementById('auth-body').style.display = 'none';
             document.getElementById('app-body').style.display = 'flex';
-            document.getElementById('user-email').innerText = "Logged in as: " + user.email;
             lucide.createIcons();
         }
 
         function showLogin() {
             document.getElementById('auth-body').style.display = 'flex';
             document.getElementById('app-body').style.display = 'none';
-            lucide.createIcons();
         }
-
-        // --- THE FIX: Smart Session Checker ---
-        window.onload = async () => {
-            // Check current session
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) showDashboard(session.user);
-
-            // Listen for state changes (Google redirect se aane par ye trigger hoga)
-            supabaseClient.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_IN' && session) {
-                    showDashboard(session.user);
-                } else if (event === 'SIGNED_OUT') {
-                    showLogin();
-                }
-            });
-        };
     </script>
 </body>
 </html>
