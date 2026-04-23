@@ -94,23 +94,32 @@
 
         // 3. Check Session on Load
        window.onload = async () => {
-    const { data: { session }, error } = await supabaseClient.auth.getSession();
-    
+    // 1. Pehle check karein ki kya session pehle se hai
+    const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
-        console.log("User is logged in:", session.user);
-        // Login ho gaya! Ab Login screen chhupao aur Dashboard dikhao
-        document.getElementById('auth-body').style.display = 'none';
-        document.getElementById('app-body').style.display = 'flex';
-        
-        // Dashboard par user ka naam dikhane ke liye (Optional)
-        // alert("Welcome " + session.user.user_metadata.full_name);
-    } else {
-        // User logged in nahi hai, login screen dikhao
-        document.getElementById('auth-body').style.display = 'flex';
-        document.getElementById('app-body').style.display = 'none';
+        showDashboard();
     }
-    lucide.createIcons();
+
+    // 2. Ye listener login hote hi turant dashboard open kar dega
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (session) {
+            showDashboard();
+        } else {
+            showLogin();
+        }
+    });
 };
+
+function showDashboard() {
+    document.getElementById('auth-body').style.display = 'none';
+    document.getElementById('app-body').style.display = 'flex';
+    lucide.createIcons();
+}
+
+function showLogin() {
+    document.getElementById('auth-body').style.display = 'flex';
+    document.getElementById('app-body').style.display = 'none';
+}
     </script>
 </body>
 </html>
