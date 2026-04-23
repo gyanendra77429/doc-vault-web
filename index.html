@@ -77,19 +77,22 @@
 
         // 2. Email Magic Link Function
         async function handleEmailAuth() {
-            const email = document.getElementById('emailInput').value;
-            if (!email) { alert("Please enter email"); return; }
+    const email = document.getElementById('emailInput').value;
+    if (!email) { alert("Please enter email"); return; }
 
-            const { error } = await supabaseClient.auth.signInWithOtp({
-                email: email,
-                options: {
-                    emailRedirectTo: window.location.origin
-                }
-            });
+    // Ye line aapki repository ka sahi link khud nikal legi
+    const currentUrl = window.location.origin + window.location.pathname;
 
-            if (error) alert("Error: " + error.message);
-            else alert("Magic Link sent! Please check your email inbox to login.");
+    const { error } = await supabaseClient.auth.signInWithOtp({
+        email: email,
+        options: {
+            emailRedirectTo: currentUrl 
         }
+    });
+
+    if (error) alert("Error: " + error.message);
+    else alert("Magic Link sent! Please check your email.");
+}
 
         // 3. Check Session on Load
        window.onload = async () => {
