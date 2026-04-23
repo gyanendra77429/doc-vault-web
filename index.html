@@ -92,13 +92,24 @@
         }
 
         // 3. Check Session on Load
-        window.onload = async () => {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
-                // Agar user logged in hai, toh dashboard par bhej dein
-                window.location.href = "dashboard.html"; // Ya jo bhi aapki dashboard file hai
-            }
-        };
+       window.onload = async () => {
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
+    
+    if (session) {
+        console.log("User is logged in:", session.user);
+        // Login ho gaya! Ab Login screen chhupao aur Dashboard dikhao
+        document.getElementById('auth-body').style.display = 'none';
+        document.getElementById('app-body').style.display = 'flex';
+        
+        // Dashboard par user ka naam dikhane ke liye (Optional)
+        // alert("Welcome " + session.user.user_metadata.full_name);
+    } else {
+        // User logged in nahi hai, login screen dikhao
+        document.getElementById('auth-body').style.display = 'flex';
+        document.getElementById('app-body').style.display = 'none';
+    }
+    lucide.createIcons();
+};
     </script>
 </body>
 </html>
