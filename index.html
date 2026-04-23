@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DocVault | By Gyanendra Singh</title>
+    <title>DocVault Pro | By Gyanendra Singh</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,142 +11,129 @@
     <style>
         :root { 
             --primary: #4f46e5; --bg: #fdfdfd; --card: #ffffff; 
-            --text: #1e293b; --accent: #818cf8; --gray: #94a3b8;
+            --text: #1e293b; --accent: #818cf8; --gray: #94a3b8; --border: #f1f5f9;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        /* DARK MODE VARIABLES */
+        body.dark { 
+            --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --border: #334155; --gray: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.3s, color 0.3s; }
         body { background: var(--bg); color: var(--text); overflow-x: hidden; }
 
-        /* --- AUTH SCREEN --- */
-        #auth-body { height: 100vh; display: flex; align-items: center; justify-content: center; background: #fff; padding: 20px; }
+        /* AUTH SCREEN */
+        #auth-body { height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 20px; }
         .auth-card { width: 100%; max-width: 380px; text-align: center; }
-        .auth-logo { font-size: 2.5rem; font-weight: 800; color: var(--primary); margin-bottom: 10px; }
         
-        /* --- MAIN LAYOUT --- */
-        #app-body { display: none; padding-bottom: 80px; }
-        .header { padding: 25px 20px; background: white; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        /* MAIN LAYOUT */
+        #app-body { display: none; padding-bottom: 90px; }
+        .header { padding: 25px 20px; background: var(--card); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         
-        /* --- NAVIGATION TAB BAR (Mobile First) --- */
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.02); }
-        .tab-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--gray); font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        /* NAVIGATION TAB BAR */
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); }
+        .tab-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--gray); font-size: 0.7rem; font-weight: 600; cursor: pointer; }
         .tab-item.active { color: var(--primary); }
 
-        /* --- CONTENT SECTIONS --- */
-        .section { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
+        /* SECTIONS */
+        .section { display: none; padding: 20px; animation: slideUp 0.4s ease; }
         .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- CARDS & UI --- */
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: white; padding: 20px; border-radius: 24px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
-        .upload-zone { background: #f8faff; border: 2px dashed #e0e7ff; padding: 40px 20px; border-radius: 30px; text-align: center; margin-bottom: 25px; }
+        /* UI ELEMENTS */
+        .stat-card { background: var(--card); padding: 20px; border-radius: 24px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .upload-zone { background: var(--primary); color: white; padding: 40px 20px; border-radius: 30px; text-align: center; margin-bottom: 25px; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3); }
         
-        .file-item { display: flex; align-items: center; gap: 15px; background: white; padding: 15px; border-radius: 20px; margin-bottom: 10px; border: 1px solid #f1f5f9; }
+        .file-item { display: flex; align-items: center; gap: 15px; background: var(--card); padding: 15px; border-radius: 20px; margin-bottom: 12px; border: 1px solid var(--border); cursor: pointer; }
+        .file-item:active { transform: scale(0.98); }
         .file-icon { width: 45px; height: 45px; background: #eef2ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary); }
 
-        .btn-action { background: var(--primary); color: white; border: none; padding: 14px 25px; border-radius: 16px; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; }
+        /* SETTINGS */
+        .settings-list { background: var(--card); border-radius: 25px; border: 1px solid var(--border); overflow: hidden; }
+        .setting-item { padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); cursor: pointer; }
+        
+        /* DARK MODE TOGGLE */
+        .toggle-btn { width: 45px; height: 24px; background: #cbd5e1; border-radius: 20px; position: relative; cursor: pointer; }
+        .toggle-btn::before { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: 0.3s; }
+        body.dark .toggle-btn { background: var(--primary); }
+        body.dark .toggle-btn::before { left: 24px; }
 
-        /* --- ADVERTISEMENT SLOT --- */
-        .ad-container { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; padding: 20px; border-radius: 25px; margin: 20px 0; position: relative; overflow: hidden; }
-        .ad-badge { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.2); font-size: 0.6rem; padding: 2px 8px; border-radius: 10px; }
-
-        /* --- SETTINGS STYLE --- */
-        .settings-list { background: white; border-radius: 25px; border: 1px solid #f1f5f9; overflow: hidden; }
-        .setting-item { padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
-        .setting-item:last-child { border: none; }
-
-        .dev-credit { text-align: center; margin-top: 30px; color: var(--gray); font-size: 0.8rem; }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 700; width: 100%; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="auth-body">
         <div class="auth-card">
-            <div class="auth-logo"><i data-lucide="folder-lock" size="48"></i></div>
-            <h1 style="font-weight: 800; margin-bottom: 5px;">DocVault</h1>
+            <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--primary);"><i data-lucide="shield-check"></i></h1>
+            <h2 style="margin: 10px 0;">DocVault Pro</h2>
             <p style="color: var(--gray); margin-bottom: 40px;">Developed by Gyanendra Singh</p>
-            <button class="btn-action" onclick="handleAuth()">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
-                Continue with Google
-            </button>
+            <button class="btn-main" onclick="handleAuth()">Continue with Google</button>
         </div>
     </div>
 
     <div id="app-body">
-        <div class="header">
+        <header class="header">
             <div>
-                <p style="font-size: 0.8rem; color: var(--gray);">Welcome back,</p>
-                <h2 id="userName" style="font-size: 1.1rem; font-weight: 800;">User</h2>
+                <p id="greeting" style="font-size: 0.8rem; color: var(--gray);">Good Morning,</p>
+                <h2 id="userName" style="font-size: 1.1rem; font-weight: 800;">Gyanendra</h2>
             </div>
-            <div style="width: 40px; height: 40px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--primary);" id="userInitial">U</div>
-        </div>
-
-        <div style="padding: 0 20px;">
-            <div class="ad-container">
-                <span class="ad-badge">SPONSORED</span>
-                <p style="font-size: 0.7rem; opacity: 0.8;">GROW YOUR BUSINESS</p>
-                <h3 style="margin: 5px 0;">Advertise with DocVault</h3>
-                <button style="background: white; color: var(--primary); border: none; padding: 6px 15px; border-radius: 10px; font-weight: 700; font-size: 0.75rem; margin-top: 10px;">Get Started</button>
-            </div>
-        </div>
+            <div id="userProfileBtn" onclick="showProfileInfo()" style="width: 45px; height: 45px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; cursor: pointer;">G</div>
+        </header>
 
         <section id="home-sec" class="section active">
-            <div class="stat-grid">
+            <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+                <i data-lucide="cloud-upload" size="40" style="margin-bottom: 15px;"></i>
+                <h3 style="font-weight: 800;">Upload New File</h3>
+                <p style="opacity: 0.8; font-size: 0.8rem;">Tap to secure your documents</p>
+                <input type="file" id="fileInput" hidden onchange="uploadFile(event)">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px;">
                 <div class="stat-card">
-                    <p style="color: var(--gray); font-size: 0.75rem;">Total Files</p>
+                    <p style="color: var(--gray); font-size: 0.7rem; font-weight: 700;">FILES</p>
                     <h2 id="fileCount">0</h2>
                 </div>
                 <div class="stat-card">
-                    <p style="color: var(--gray); font-size: 0.75rem;">Storage</p>
-                    <h2>1 GB</h2>
+                    <p style="color: var(--gray); font-size: 0.7rem; font-weight: 700;">STORAGE</p>
+                    <h2 style="color: #10b981;">Unlimited</h2>
                 </div>
-            </div>
-            
-            <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
-                <div style="width: 60px; height: 60px; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.05);">
-                    <i data-lucide="plus" color="#4f46e5"></i>
-                </div>
-                <h3 style="font-weight: 800;">Upload Document</h3>
-                <p style="color: var(--gray); font-size: 0.8rem; margin-top: 5px;">PDF, Docs or Images</p>
-                <input type="file" id="fileInput" hidden onchange="uploadFile(event)">
             </div>
         </section>
 
         <section id="files-sec" class="section">
             <h2 style="margin-bottom: 20px; font-weight: 800;">My Vault</h2>
             <div id="fileContainer">
-                <p style="text-align: center; color: var(--gray); padding: 40px;">No files yet.</p>
-            </div>
+                </div>
         </section>
 
         <section id="settings-sec" class="section">
             <h2 style="margin-bottom: 20px; font-weight: 800;">Settings</h2>
             <div class="settings-list">
-                <div class="setting-item">
-                    <span><i data-lucide="user" size="18" style="vertical-align: middle; margin-right: 10px;"></i> Profile Status</span>
-                    <span style="color: #10b981; font-weight: 700; font-size: 0.8rem;">PRO</span>
-                </div>
-                <div class="setting-item">
-                    <span><i data-lucide="moon" size="18" style="vertical-align: middle; margin-right: 10px;"></i> Dark Mode</span>
-                    <div style="width: 40px; height: 20px; background: #e2e8f0; border-radius: 20px; position: relative;"><div style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px;"></div></div>
-                </div>
-                <div class="setting-item" onclick="window.location.href='mailto:gyanendrasingh77429@gmail.com'">
-                    <span><i data-lucide="mail" size="18" style="vertical-align: middle; margin-right: 10px;"></i> Contact Support</span>
+                <div class="setting-item" onclick="showProfileInfo()">
+                    <span><i data-lucide="user" size="18" style="vertical-align: middle; margin-right: 12px;"></i> Profile Account</span>
                     <i data-lucide="chevron-right" size="16"></i>
                 </div>
+                <div class="setting-item" onclick="toggleDarkMode()">
+                    <span><i data-lucide="moon" size="18" style="vertical-align: middle; margin-right: 12px;"></i> Dark Mode</span>
+                    <div class="toggle-btn" id="darkToggle"></div>
+                </div>
+                <div class="setting-item" onclick="window.location.href='mailto:gyanendrasingh77429@gmail.com'">
+                    <span><i data-lucide="mail" size="18" style="vertical-align: middle; margin-right: 12px;"></i> Contact Gyanendra</span>
+                </div>
                 <div class="setting-item" style="color: #ef4444;" onclick="logout()">
-                    <span><i data-lucide="log-out" size="18" style="vertical-align: middle; margin-right: 10px;"></i> Sign Out</span>
+                    <span><i data-lucide="log-out" size="18" style="vertical-align: middle; margin-right: 12px;"></i> Logout</span>
                 </div>
             </div>
-            
-            <div class="dev-credit">
-                <p>Designed & Developed by</p>
-                <p style="font-weight: 800; color: var(--text); margin-top: 5px;">Gyanendra Singh</p>
+
+            <div style="text-align: center; margin-top: 40px;">
+                <p style="font-size: 0.75rem; color: var(--gray);">App Version 3.0</p>
+                <p style="font-weight: 800; font-size: 0.8rem; margin-top: 5px;">Built by Gyanendra Singh</p>
             </div>
         </section>
 
         <nav class="tab-bar">
-            <div class="tab-item active" onclick="switchTab('home-sec', this)"><i data-lucide="home"></i><span>Home</span></div>
+            <div class="tab-item active" onclick="switchTab('home-sec', this)"><i data-lucide="layout-grid"></i><span>Home</span></div>
             <div class="tab-item" onclick="switchTab('files-sec', this)"><i data-lucide="folder"></i><span>Files</span></div>
             <div class="tab-item" onclick="switchTab('settings-sec', this)"><i data-lucide="settings"></i><span>Settings</span></div>
         </nav>
@@ -157,12 +144,79 @@
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhemRuYnNlc3RubHd4b2d4bmZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NjE0NzcsImV4cCI6MjA5MjQzNzQ3N30.erpQghV9yktpj1efrNMkgsTzY7ePJDYIZhU1E_3CHMs";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
+        // DARK MODE LOGIC
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+        }
+
+        // PROFILE INFO
+        async function showProfileInfo() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            alert(`User: ${user.user_metadata.full_name}\nEmail: ${user.email}\nDeveloper: Gyanendra Singh`);
+        }
+
+        // TAB SWITCHING
         function switchTab(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             el.classList.add('active');
             lucide.createIcons();
+        }
+
+        // FILE UPLOAD & OPENING
+        async function uploadFile(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            alert("Uploading to Gyanendra's Secure Vault...");
+            
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            const filePath = `${user.id}/${Date.now()}_${file.name}`;
+            
+            const { error } = await supabaseClient.storage.from('documents').upload(filePath, file);
+            
+            if(error) alert("Upload Failed! Check Supabase Policies.");
+            else {
+                alert("File Secured Successfully!");
+                loadFiles();
+            }
+        }
+
+        async function openFile(fileName) {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            const { data, error } = await supabaseClient.storage
+                .from('documents')
+                .createSignedUrl(`${user.id}/${fileName}`, 3600); // URL valid for 1 hour
+            
+            if(error) alert("Error opening file: " + error.message);
+            else window.open(data.signedUrl, '_blank');
+        }
+
+        async function loadFiles() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            const { data, error } = await supabaseClient.storage.from('documents').list(user.id);
+            
+            if(!error) {
+                document.getElementById('fileCount').innerText = data.length;
+                const container = document.getElementById('fileContainer');
+                if(data.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; margin-top:50px; color:var(--gray);">Vault is empty.</p>';
+                    return;
+                }
+                container.innerHTML = data.map(f => `
+                    <div class="file-item" onclick="openFile('${f.name}')">
+                        <div class="file-icon"><i data-lucide="file-text"></i></div>
+                        <div style="flex:1">
+                            <p style="font-weight:600; font-size:0.9rem;">${f.name.split('_')[1] || f.name}</p>
+                            <p style="font-size:0.7rem; color:var(--gray);">Tap to open</p>
+                        </div>
+                        <i data-lucide="external-link" size="16" color="#94a3b8"></i>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            }
         }
 
         async function handleAuth() {
@@ -177,49 +231,15 @@
             location.reload();
         }
 
-        async function uploadFile(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-            
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            const filePath = `${user.id}/${Date.now()}_${file.name}`;
-            
-            const { error } = await supabaseClient.storage.from('documents').upload(filePath, file);
-            
-            if(error) alert("RLS Error: " + error.message);
-            else {
-                alert("File Secured!");
-                loadFiles();
-            }
-        }
-
-        async function loadFiles() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            const { data, error } = await supabaseClient.storage.from('documents').list(user.id);
-            
-            if(!error) {
-                document.getElementById('fileCount').innerText = data.length;
-                const container = document.getElementById('fileContainer');
-                container.innerHTML = data.map(f => `
-                    <div class="file-item">
-                        <div class="file-icon"><i data-lucide="file-text"></i></div>
-                        <div style="flex:1">
-                            <p style="font-weight:600; font-size:0.9rem;">${f.name.split('_')[1] || f.name}</p>
-                            <p style="font-size:0.7rem; color:var(--gray);">Secure Storage</p>
-                        </div>
-                        <i data-lucide="more-vertical" size="18" color="#94a3b8"></i>
-                    </div>
-                `).join('');
-                lucide.createIcons();
-            }
-        }
-
         window.onload = async () => {
+            // Restore Dark Mode
+            if(localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark');
+
             const { data: { session } } = await supabaseClient.auth.getSession();
             if(session) {
                 document.getElementById('auth-body').style.display = 'none';
                 document.getElementById('app-body').style.display = 'block';
-                document.getElementById('userName').innerText = session.user.user_metadata.full_name;
+                document.getElementById('userName').innerText = session.user.user_metadata.full_name.split(' ')[0];
                 document.getElementById('userInitial').innerText = session.user.email[0].toUpperCase();
                 loadFiles();
             }
