@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DocVault Luxe | Secured by Gyanendra Singh</title>
+    <title>DocVault Luxe | Developed by Gyanendra Singh</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -14,52 +14,61 @@
             --text: #ffffff; --gray: #94a3b8; --border: #262c36; --accent: #ff4757;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: var(--bg); color: var(--text); overflow: hidden; }
+        body.light-mode {
+            --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --border: #e2e8f0; --gray: #64748b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        body { background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; }
 
         /* --- PIN SCREEN --- */
         #pin-screen { 
             position: fixed; inset: 0; background: var(--bg); z-index: 9999; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
         }
         .pin-dot-container { display: flex; gap: 15px; margin-bottom: 40px; }
-        .pin-dot { width: 15px; height: 15px; border: 2px solid var(--primary); border-radius: 50%; }
+        .pin-dot { width: 16px; height: 16px; border: 2px solid var(--primary); border-radius: 50%; }
         .pin-dot.filled { background: var(--primary); box-shadow: 0 0 15px var(--primary); }
         
         .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 280px; }
         .num-btn { 
-            width: 70px; height: 70px; border-radius: 50%; border: 1px solid var(--border); 
-            background: var(--card); color: white; font-size: 1.5rem; font-weight: 700;
+            width: 75px; height: 75px; border-radius: 50%; border: 1px solid var(--border); 
+            background: var(--card); color: white; font-size: 1.6rem; font-weight: 700;
             display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
         .num-btn:active { background: var(--primary); color: #000; transform: scale(0.9); }
 
-        /* --- LAYOUT --- */
-        #app-body { display: none; height: 100vh; overflow-y: auto; padding-bottom: 100px; }
-        .navbar { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(10, 12, 16, 0.8); backdrop-filter: blur(15px); sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); }
-        
+        /* --- AUTH --- */
+        #auth-body { height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #1a1e26 0%, #0a0c10 100%); }
+        .premium-btn { background: linear-gradient(135deg, #d4af37, #f1d279); color: #000; border: none; padding: 18px; border-radius: 20px; font-weight: 800; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; }
+
         /* --- SUPPORT MODAL --- */
         #support-modal { 
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); 
-            z-index: 10000; padding: 30px; align-items: center; justify-content: center;
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); 
+            z-index: 10001; padding: 30px; align-items: center; justify-content: center; backdrop-filter: blur(5px);
         }
-        .modal-content { background: var(--card); padding: 25px; border-radius: 30px; border: 1px solid var(--primary); width: 100%; max-width: 350px; text-align: center; }
+        .modal-content { background: var(--card); padding: 30px; border-radius: 30px; border: 1px solid var(--primary); width: 100%; max-width: 360px; text-align: center; }
 
-        /* --- OTHER STYLES --- */
-        .section { display: none; padding: 20px; }
+        /* --- MAIN UI --- */
+        #app-body { display: none; height: 100vh; overflow-y: auto; }
+        .navbar { padding: 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: rgba(10, 12, 16, 0.8); backdrop-filter: blur(15px); z-index: 1000; border-bottom: 1px solid var(--border); }
+        .user-pfp { width: 42px; height: 42px; border: 2px solid var(--primary); border-radius: 14px; display: flex; align-items: center; justify-content: center; background: var(--card); cursor: pointer; font-weight: 800; color: var(--primary); }
+
+        .section { display: none; padding: 0 20px 100px; animation: fadeIn 0.5s ease; }
         .section.active { display: block; }
-        .premium-btn { background: linear-gradient(135deg, #d4af37, #f1d279); color: #000; border: none; padding: 18px; border-radius: 20px; font-weight: 800; width: 100%; cursor: pointer; }
-        .tab-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(22, 26, 33, 0.95); border: 1px solid var(--border); display: flex; justify-content: space-around; padding: 15px; border-radius: 30px; z-index: 1000; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .file-card { display: flex; align-items: center; gap: 15px; background: var(--card); padding: 18px; border-radius: 24px; margin-bottom: 12px; border: 1px solid var(--border); }
+        .tab-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(22, 26, 33, 0.95); border: 1px solid var(--border); display: flex; justify-content: space-around; padding: 15px; border-radius: 30px; z-index: 1000; backdrop-filter: blur(15px); }
         .tab-btn { color: var(--gray); display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 0.7rem; font-weight: 700; cursor: pointer; }
         .tab-btn.active { color: var(--primary); }
-        .file-card { display: flex; align-items: center; gap: 15px; background: var(--card); padding: 18px; border-radius: 24px; margin-bottom: 12px; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
-    <div id="pin-screen" style="display: none;">
+    <div id="pin-screen">
         <i data-lucide="shield-check" color="#d4af37" size="48" style="margin-bottom: 10px;"></i>
-        <h2 id="pin-msg" style="margin-bottom: 30px; font-weight: 800; letter-spacing: -1px;">Enter Vault PIN</h2>
+        <h2 id="pin-msg" style="margin-bottom: 30px; font-weight: 800;">Enter Vault PIN</h2>
         <div class="pin-dot-container">
             <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
         </div>
@@ -69,55 +78,73 @@
             <div class="num-btn" onclick="pressNum('7')">7</div><div class="num-btn" onclick="pressNum('8')">8</div><div class="num-btn" onclick="pressNum('9')">9</div>
             <div class="num-btn" onclick="clearPin()"><i data-lucide="delete"></i></div>
             <div class="num-btn" onclick="pressNum('0')">0</div>
-            <div class="num-btn" onclick="pressNum('X')"><i data-lucide="x"></i></div>
+            <div class="num-btn" onclick="clearPin()"><i data-lucide="x"></i></div>
         </div>
     </div>
 
-    <div id="auth-body" style="height:100vh; display:flex; align-items:center; justify-content:center; text-align:center;">
-        <div style="width: 90%; max-width: 360px;">
-            <i data-lucide="crown" size="60" color="#d4af37" style="margin-bottom: 20px;"></i>
-            <h1 style="font-weight: 800; font-size: 2.2rem; margin-bottom: 30px;">DocVault Luxe</h1>
-            <button class="premium-btn" onclick="handleAuth()">Continue with Google</button>
+    <div id="auth-body">
+        <div style="text-align: center; width: 90%; max-width: 360px;">
+            <div style="background: var(--card); width: 80px; height: 80px; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; border: 1px solid var(--primary);">
+                <i data-lucide="crown" size="40" color="#d4af37"></i>
+            </div>
+            <h1 style="font-weight: 800; font-size: 2.4rem; margin-bottom: 8px;">DocVault Luxe</h1>
+            <p style="color: var(--gray); margin-bottom: 40px;">Developed by Gyanendra Singh</p>
+            <button class="premium-btn" onclick="handleAuth()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Continue with Google
+            </button>
         </div>
     </div>
 
     <div id="app-body">
         <nav class="navbar">
-            <h2 style="color: var(--primary); font-weight: 800;">DV Luxe</h2>
-            <div id="nav-initial" style="width:40px; height:40px; background:var(--card); border:1px solid var(--primary); border-radius:12px; display:flex; align-items:center; justify-content:center; color:var(--primary); font-weight:800;">G</div>
+            <div>
+                <p style="font-size: 0.7rem; color: var(--gray); font-weight: 800;">PREMIUM ACCESS</p>
+                <h3 id="top-user-name" style="font-size: 1rem;">User</h3>
+            </div>
+            <div class="user-pfp" onclick="switchTab('profile-sec', this)" id="nav-initial">G</div>
         </nav>
 
         <section id="home-sec" class="section active">
-            <div style="padding: 40px 20px; text-align: center; border: 2px dashed var(--primary); border-radius: 30px; margin-bottom: 25px;" onclick="document.getElementById('fileInput').click()">
+            <div style="padding: 40px 20px; text-align: center; border: 2px dashed var(--primary); border-radius: 30px; margin: 20px 0;" onclick="document.getElementById('fileInput').click()">
                 <i data-lucide="upload-cloud" size="48" color="#d4af37"></i>
-                <h3 style="margin-top:10px;">Secure New Files</h3>
+                <h2 style="margin-top:15px;">Secure New Asset</h2>
                 <input type="file" id="fileInput" hidden multiple onchange="handleMultipleUploads(event)">
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div style="background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid var(--border);">
-                    <p style="color:var(--gray); font-size:0.7rem;">VAULT SIZE</p>
-                    <h2 style="color:var(--primary);">UNLIMITED</h2>
+                    <p style="color: var(--gray); font-size: 0.65rem; font-weight: 800;">ASSETS</p>
+                    <h2 id="fileCount" style="color: var(--primary);">0</h2>
                 </div>
                 <div style="background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid var(--border);">
-                    <p style="color:var(--gray); font-size:0.7rem;">FILES</p>
-                    <h2 id="fileCount">0</h2>
+                    <p style="color: var(--gray); font-size: 0.65rem; font-weight: 800;">SECURITY</p>
+                    <h2 style="color: #10b981; font-size: 1.2rem;">LOCKED</h2>
                 </div>
             </div>
         </section>
 
         <section id="vault-sec" class="section">
-            <h2 style="margin-bottom:20px;">Secured Assets</h2>
+            <h2 style="margin: 20px 0; font-weight: 800;">Your Vault</h2>
             <div id="fileContainer"></div>
         </section>
 
         <section id="profile-sec" class="section">
-            <div class="settings-card" style="background:var(--card); border-radius:25px; border:1px solid var(--border); overflow:hidden;">
-                <div style="padding:20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;" onclick="showSupport()">
-                    <span><i data-lucide="help-circle" size="18" style="vertical-align:middle; margin-right:10px;"></i> Help & Support</span>
-                    <i data-lucide="chevron-right"></i>
+            <div style="text-align: center; padding: 30px 0;">
+                <div style="width: 80px; height: 80px; background: var(--primary); color: #000; border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; margin: 0 auto 15px;" id="profile-initial">G</div>
+                <h2 id="profile-name">User</h2>
+                <p id="profile-email" style="color: var(--gray); font-size: 0.8rem;">---</p>
+            </div>
+
+            <div style="background: var(--card); border-radius: 25px; border: 1px solid var(--border); overflow: hidden;">
+                <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;" onclick="showSupport()">
+                    <span><i data-lucide="help-circle" size="18" style="vertical-align: middle; margin-right: 12px;"></i> Help & Support</span>
+                    <i data-lucide="chevron-right" size="18"></i>
                 </div>
-                <div style="padding:20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;" onclick="logout()">
-                    <span style="color:var(--accent);"><i data-lucide="log-out" size="18" style="vertical-align:middle; margin-right:10px;"></i> Logout</span>
+                <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;" onclick="toggleTheme()">
+                    <span><i data-lucide="sun" size="18" style="vertical-align: middle; margin-right: 12px;"></i> Theme Toggle</span>
+                    <i data-lucide="moon" size="18" color="#d4af37"></i>
+                </div>
+                <div style="padding: 20px; color: var(--accent);" onclick="logout()">
+                    <span><i data-lucide="log-out" size="18" style="vertical-align: middle; margin-right: 12px;"></i> Logout</span>
                 </div>
             </div>
         </section>
@@ -125,17 +152,17 @@
         <nav class="tab-bar">
             <div class="tab-btn active" onclick="switchTab('home-sec', this)"><i data-lucide="home"></i><span>Home</span></div>
             <div class="tab-btn" onclick="switchTab('vault-sec', this)"><i data-lucide="shield"></i><span>Vault</span></div>
-            <div class="tab-btn" onclick="switchTab('profile-sec', this)"><i data-lucide="user"></i><span>Profile</span></div>
+            <div class="tab-btn" onclick="switchTab('profile-sec', this)"><i data-lucide="settings"></i><span>Settings</span></div>
         </nav>
     </div>
 
     <div id="support-modal">
         <div class="modal-content">
             <i data-lucide="headphones" size="40" color="#d4af37" style="margin-bottom:15px;"></i>
-            <h3 style="margin-bottom:10px;">Luxe Support</h3>
-            <p style="color:var(--gray); font-size:0.8rem; margin-bottom:20px;">Contact the developer for any technical issues or ad placements.</p>
-            <button class="premium-btn" onclick="window.location.href='mailto:gyanendrasingh77429@gmail.com'" style="margin-bottom:10px;">Email Gyanendra</button>
-            <button style="background:transparent; color:var(--gray); border:none;" onclick="closeSupport()">Close</button>
+            <h3>Luxe Support</h3>
+            <p style="color:var(--gray); font-size:0.85rem; margin: 15px 0 25px;">Contact Gyanendra Singh for tech help or business queries.</p>
+            <button class="premium-btn" onclick="window.location.href='mailto:gyanendrasingh77429@gmail.com'">Email Developer</button>
+            <button style="background:transparent; color:var(--gray); border:none; margin-top:15px; font-weight:700;" onclick="closeSupport()">CLOSE</button>
         </div>
     </div>
 
@@ -149,11 +176,14 @@
 
         // --- PIN LOGIC ---
         function pressNum(n) {
-            if(n === 'X') { currentPin = ""; updateDots(); return; }
             if(currentPin.length < 4) currentPin += n;
             updateDots();
-            if(currentPin.length === 4) checkPin();
+            if(currentPin.length === 4) {
+                setTimeout(checkPin, 200);
+            }
         }
+
+        function clearPin() { currentPin = ""; updateDots(); }
 
         function updateDots() {
             const dots = document.querySelectorAll('.pin-dot');
@@ -166,36 +196,37 @@
         function checkPin() {
             if(!savedPin) {
                 localStorage.setItem('vaultPin', currentPin);
-                alert("PIN Set Successfully!");
+                alert("PIN Created! Your vault is now secure.");
                 unlockApp();
             } else if(currentPin === savedPin) {
                 unlockApp();
             } else {
-                alert("Incorrect PIN!");
-                currentPin = "";
-                updateDots();
+                alert("Wrong PIN. Try again!");
+                clearPin();
             }
         }
 
         function unlockApp() {
             document.getElementById('pin-screen').style.display = 'none';
             document.getElementById('app-body').style.display = 'block';
+            document.body.style.overflow = 'auto';
             loadFiles();
         }
 
-        // --- NAVIGATION ---
+        // --- UI NAVIGATION ---
         function switchTab(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            el.classList.add('active');
+            if(el.classList && el.classList.contains('tab-btn')) el.classList.add('active');
             lucide.createIcons();
         }
 
         function showSupport() { document.getElementById('support-modal').style.display = 'flex'; lucide.createIcons(); }
         function closeSupport() { document.getElementById('support-modal').style.display = 'none'; }
+        function toggleTheme() { document.body.classList.toggle('light-mode'); }
 
-        // --- AUTH & FILES ---
+        // --- AUTH & DATA ---
         async function handleAuth() {
             await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
         }
@@ -219,15 +250,10 @@
             const { data: { user } } = await supabaseClient.auth.getUser();
             const { data } = await supabaseClient.storage.from('documents').list(user.id);
             document.getElementById('fileCount').innerText = data.length;
-            const container = document.getElementById('fileContainer');
-            container.innerHTML = data.map(f => `
+            document.getElementById('fileContainer').innerHTML = data.map(f => `
                 <div class="file-card">
-                    <div style="background:#262c36; padding:10px; border-radius:12px; color:var(--primary);">
-                        <i data-lucide="file"></i>
-                    </div>
-                    <div style="flex:1" onclick="openFile('${f.name}')">
-                        <p style="font-weight:700; font-size:0.9rem;">${f.name.split('_')[1] || f.name}</p>
-                    </div>
+                    <div style="background:#262c36; padding:10px; border-radius:12px; color:var(--primary);"><i data-lucide="file"></i></div>
+                    <div style="flex:1" onclick="openFile('${f.name}')"><p style="font-weight:700;">${f.name.split('_')[1] || f.name}</p></div>
                 </div>
             `).join('');
             lucide.createIcons();
@@ -244,7 +270,14 @@
             if(session) {
                 document.getElementById('auth-body').style.display = 'none';
                 document.getElementById('pin-screen').style.display = 'flex';
-                if(!savedPin) document.getElementById('pin-msg').innerText = "Set Your New PIN";
+                if(!savedPin) document.getElementById('pin-msg').innerText = "Create Your Vault PIN";
+                
+                const u = session.user.user_metadata;
+                document.getElementById('top-user-name').innerText = u.full_name;
+                document.getElementById('profile-name').innerText = u.full_name;
+                document.getElementById('profile-email').innerText = session.user.email;
+                document.getElementById('nav-initial').innerText = u.full_name[0];
+                document.getElementById('profile-initial').innerText = u.full_name[0];
             }
             lucide.createIcons();
         };
