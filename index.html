@@ -8,6 +8,8 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
     <style>
         :root { 
             --primary: #d4af37; --bg: #0a0c10; --card: #161a21; 
@@ -57,12 +59,17 @@
         .search-box { width: 100%; background: var(--card); border: 1px solid var(--border); padding: 16px 20px; border-radius: 20px; color: var(--text); margin: 10px 0 20px; outline: none; }
 
         /* --- MODAL --- */
-        #support-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10001; padding: 30px; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-content { background: var(--card); padding: 30px; border-radius: 30px; border: 1px solid var(--primary); width: 100%; max-width: 360px; text-align: center; }
+        #support-modal, #policy-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10001; padding: 30px; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--card); padding: 30px; border-radius: 30px; border: 1px solid var(--primary); width: 100%; max-width: 380px; text-align: center; max-height: 80vh; overflow-y: auto; }
 
         .tab-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(22, 26, 33, 0.95); border: 1px solid var(--border); display: flex; justify-content: space-around; padding: 15px; border-radius: 30px; z-index: 1000; backdrop-filter: blur(15px); }
         .tab-btn { color: var(--gray); display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 0.7rem; font-weight: 700; cursor: pointer; }
         .tab-btn.active { color: var(--primary); }
+
+        footer { text-align: center; padding: 40px 20px 120px; border-top: 1px solid var(--border); margin-top: 40px; }
+        .footer-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 15px; }
+        .footer-links a { color: var(--gray); text-decoration: none; font-size: 0.75rem; font-weight: 600; }
+        .footer-links a:hover { color: var(--primary); }
     </style>
 </head>
 <body>
@@ -152,6 +159,7 @@
                 </div>
                 <div style="padding: 20px; color: var(--accent);" onclick="logout()">
                     <span><i data-lucide="log-out" size="18" style="vertical-align: middle; margin-right: 12px;"></i> Logout Session</span>
+                    <i data-lucide="chevron-right" size="18"></i>
                 </div>
             </div>
 
@@ -160,6 +168,16 @@
                 <p style="font-size: 0.7rem; font-weight: 600; opacity: 0.8;">Premium Ad Space Available</p>
             </div>
         </section>
+
+        <footer>
+            <div class="footer-links">
+                <a href="javascript:void(0)" onclick="openPolicy('about')">About</a>
+                <a href="javascript:void(0)" onclick="openPolicy('privacy')">Privacy</a>
+                <a href="javascript:void(0)" onclick="openPolicy('terms')">Terms</a>
+                <a href="javascript:void(0)" onclick="showSupport()">Contact</a>
+            </div>
+            <p style="font-size: 0.65rem; color: var(--gray);">© 2026 DocVault Luxe. All Rights Reserved.<br>Secure Document Management System</p>
+        </footer>
 
         <nav class="tab-bar">
             <div class="tab-btn active" onclick="switchTab('home-sec', this)"><i data-lucide="home"></i><span>Home</span></div>
@@ -178,6 +196,14 @@
         </div>
     </div>
 
+    <div id="policy-modal">
+        <div class="modal-content">
+            <h3 id="policy-title" style="color: var(--primary); margin-bottom: 15px;"></h3>
+            <div id="policy-text" style="color: var(--gray); font-size: 0.8rem; text-align: left; line-height: 1.6;"></div>
+            <button style="background:var(--primary); color:#000; border:none; margin-top:20px; padding: 10px 20px; border-radius: 10px; font-weight:700;" onclick="closePolicy()">Got it</button>
+        </div>
+    </div>
+
     <script>
         const SB_URL = "https://sazdnbsestnlwxogxnfd.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhemRuYnNlc3RubHd4b2d4bmZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NjE0NzcsImV4cCI6MjA5MjQzNzQ3N30.erpQghV9yktpj1efrNMkgsTzY7ePJDYIZhU1E_3CHMs";
@@ -186,6 +212,29 @@
         let currentPin = "";
         let savedPin = localStorage.getItem('vaultPin');
         let vaultData = [];
+
+        // --- POLICY DATA ---
+        const policyData = {
+            about: {
+                title: "About DocVault Luxe",
+                text: "DocVault Luxe is a premium cloud-based document security system developed by Gyanendra Singh. We provide military-grade AES-256 encryption feel with a personalized 4-digit PIN access. Our mission is to make document storage both stylish and secure for every user."
+            },
+            privacy: {
+                title: "Privacy Policy",
+                text: "At DocVault Luxe, your privacy is our priority. We use Google OAuth for secure authentication. Your files are stored in encrypted Supabase buckets. We do not share your data with third parties. Cookies are used only for session management and by Google AdSense for advertisement purposes."
+            },
+            terms: {
+                title: "Terms of Service",
+                text: "By using DocVault Luxe, you agree to store only legal documents. The developer (Gyanendra Singh) is not responsible for any data loss due to forgotten PINs. Ensure you have a backup of your important assets."
+            }
+        };
+
+        function openPolicy(type) {
+            document.getElementById('policy-title').innerText = policyData[type].title;
+            document.getElementById('policy-text').innerText = policyData[type].text;
+            document.getElementById('policy-modal').style.display = 'flex';
+        }
+        function closePolicy() { document.getElementById('policy-modal').style.display = 'none'; }
 
         // --- PIN LOGIC ---
         function pressNum(n) {
@@ -241,8 +290,11 @@
 
         // --- AUTH & DATA ---
         async function handleAuth() {
-            const currentURL = window.location.origin + window.location.pathname;
-            await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: currentURL } });
+            const currentURL = window.location.origin;
+            await supabaseClient.auth.signInWithOAuth({ 
+                provider: 'google', 
+                options: { redirectTo: currentURL } 
+            });
         }
 
         async function logout() {
@@ -320,11 +372,12 @@
                 if(!savedPin) document.getElementById('pin-msg').innerText = "Set Your New PIN";
                 
                 const u = session.user.user_metadata;
-                document.getElementById('top-user-name').innerText = u.full_name;
-                document.getElementById('profile-name').innerText = u.full_name;
+                document.getElementById('top-user-name').innerText = u.full_name || "Luxe User";
+                document.getElementById('profile-name').innerText = u.full_name || "Luxe User";
                 document.getElementById('profile-email').innerText = session.user.email;
-                document.getElementById('nav-initial').innerText = u.full_name[0];
-                document.getElementById('profile-initial').innerText = u.full_name[0];
+                const initial = (u.full_name ? u.full_name[0] : "U");
+                document.getElementById('nav-initial').innerText = initial;
+                document.getElementById('profile-initial').innerText = initial;
             }
             lucide.createIcons();
         };
